@@ -36,3 +36,8 @@ bool Pmms::isEnvious(const bundle_t& b1, const bundle_t& b2,
                      const Valuation& valuation) {
   return valuation[b1] < muValue(b1, b2, valuation);
 }
+
+// bool Pmms::isEnvyFree(const Allocation& allocation,
+//                       const std::vector<Valuation>& valuations) {
+
+// }

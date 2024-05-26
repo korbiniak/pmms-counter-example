@@ -11,7 +11,7 @@ class Valuation {
   std::vector<valuation_t> v;
 
  public:
-  Valuation(const std::vector<valuation_t>& v);
+  Valuation(const std::vector<valuation_t>& v_);
   Valuation() = default;
   Valuation(const Valuation& other) = default;
   Valuation(Valuation&& other) noexcept = default;

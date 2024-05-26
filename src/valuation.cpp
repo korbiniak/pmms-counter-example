@@ -2,7 +2,7 @@
 
 #include <vector>
 
-Valuation::Valuation(const std::vector<valuation_t>& v) : v(v) {}
+Valuation::Valuation(const std::vector<valuation_t>& v_) : v(v_) {}
 
 valuation_t Valuation::operator[](const bundle_t& bundle) const {
   valuation_t result = 0;
