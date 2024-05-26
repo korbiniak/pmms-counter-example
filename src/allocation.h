@@ -1,6 +1,8 @@
 #ifndef ALLOCATION_H
 #define ALLOCATION_H
 
+#include <functional>
+#include <iostream>
 #include <vector>
 
 #include "src/config.h"
@@ -23,6 +25,11 @@ class Allocation {
 
   bundle_t& operator[](const std::size_t& idx);
   const bundle_t& operator[](const std::size_t& idx) const;
+
+  static void iter3(const size_t& m,
+                    const std::function<void(const Allocation&)>& func);
+
+  void dump(std::ostream& os) const;
 };
 
 #endif

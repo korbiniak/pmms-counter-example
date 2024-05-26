@@ -50,6 +50,7 @@ test_src = files(
   testdir / 'test_main.cpp',
   testdir / 'test_bundle.cpp',
   testdir / 'test_valuation.cpp',
+  testdir / 'test_allocation.cpp',
 )
 
 app_src = files(srcdir / 'main.cpp')
@@ -61,5 +62,5 @@ test_executable = executable(
   include_directories: inc_dir
 )
 
-test('all_tests', test_executable)
+test('all_tests', test_executable, workdir : meson.source_root())
 executable('main', [lib_src, app_src], include_directories: inc_dir)
