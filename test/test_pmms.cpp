@@ -51,3 +51,23 @@ TEST(Pmms, isEnvy) {
   EXPECT_FALSE(Pmms::isEnvious(b2, b1, valuation1));
   EXPECT_FALSE(Pmms::isEnvious(b2, b1, valuation2));
 }
+
+TEST(Pmms, isEnvyFree) {
+  bundle_t b1 = Bundle::bundle({0, 1, 2});
+  bundle_t b2 = Bundle::bundle({
+      6,
+  });
+  bundle_t b3 = Bundle::bundle({3, 4, 5});
+
+  Valuation valuation1({35, 21, 21, 21, 20, 35, 10});
+  Valuation valuation2({60, 50, 50, 10, 30, 10, 100});
+  Valuation valuation3({10, 10, 10, 60, 10, 60, 100});
+
+  Allocation allocation1({b1, b2, b3}, 7);
+
+  allocation1.debugCheckIntegrity();
+  EXPECT_TRUE(
+      Pmms::isEnvyFree(allocation1, {valuation1, valuation2, valuation3}));
+  EXPECT_FALSE(
+      Pmms::isEnvyFree(allocation1, {valuation1, valuation3, valuation2}));
+}

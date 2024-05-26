@@ -37,7 +37,22 @@ bool Pmms::isEnvious(const bundle_t& b1, const bundle_t& b2,
   return valuation[b1] < muValue(b1, b2, valuation);
 }
 
-// bool Pmms::isEnvyFree(const Allocation& allocation,
-//                       const std::vector<Valuation>& valuations) {
+bool Pmms::isEnvyFree(const Allocation& allocation,
+                      const std::vector<Valuation>& valuations) {
+  int n = allocation.agents();
+  std::vector<valuation_t> values(n);
+  for (int i = 0; i < n; i++) {
+    values[i] = valuations[i][allocation[i]];
+  }
 
-// }
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      auto [left, right] = mu(allocation[i], allocation[j], valuations[i]);
+      if (values[i] < valuations[i][left] || values[j] < valuations[j][left]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}

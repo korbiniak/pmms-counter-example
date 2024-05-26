@@ -8,17 +8,21 @@
 class Allocation {
  private:
   std::vector<bundle_t> bundles;
-  int m;
+  std::size_t m;
 
  public:
-  Allocation(const std::vector<bundle_t>& bundles_, const int& m_);
-  Allocation(std::vector<bundle_t>&& bundles_, const int& m_);
+  Allocation(const std::vector<bundle_t>& bundles_, const std::size_t& m_);
+  Allocation(std::vector<bundle_t>&& bundles_, const std::size_t& m_);
   Allocation(const Allocation& other) = default;
   Allocation(Allocation&& other) noexcept = default;
   Allocation& operator=(const Allocation& other) = default;
   Allocation& operator=(Allocation&& other) noexcept = default;
 
   void debugCheckIntegrity();
+  inline std::size_t agents() const { return bundles.size(); }
+
+  bundle_t& operator[](const std::size_t& idx);
+  const bundle_t& operator[](const std::size_t& idx) const;
 };
 
 #endif
