@@ -26,3 +26,13 @@ std::pair<bundle_t, bundle_t> Pmms::mu(const bundle_t& b1, const bundle_t& b2,
 
   return {best_bundle, all_items & (~best_bundle)};
 }
+
+valuation_t Pmms::muValue(const bundle_t& b1, const bundle_t& b2,
+                          const Valuation& valuation) {
+  return valuation[mu(b1, b2, valuation).first];
+}
+
+bool Pmms::isEnvious(const bundle_t& b1, const bundle_t& b2,
+                     const Valuation& valuation) {
+  return valuation[b1] < muValue(b1, b2, valuation);
+}

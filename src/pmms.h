@@ -14,8 +14,8 @@ class Pmms {
                                           const bundle_t& b2,
                                           const Valuation& valuation);
 
-  static valuation_t mu_value(const bundle_t& b1, const bundle_t& b2,
-                              const Valuation& valuation);
+  static valuation_t muValue(const bundle_t& b1, const bundle_t& b2,
+                             const Valuation& valuation);
 
   static bool isEnvious(const bundle_t& b1, const bundle_t& b2,
                         const Valuation& valuation);
