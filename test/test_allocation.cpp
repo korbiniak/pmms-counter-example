@@ -5,17 +5,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-std::string readFile(const std::string& filePath) {
-  std::ifstream file(filePath);
-  std::string content((std::istreambuf_iterator<char>(file)),
-                      std::istreambuf_iterator<char>());
-  return content;
-}
+#include "test/test_common.h"
 
 TEST(Allocation, iter3) {
   std::stringstream ss;
 
-  const std::string expected = readFile("test/allocation-iter3-test.out");
+  const std::string expected =
+      TestCommon::readFile("test/allocation-iter3.out");
   Allocation::iter3(3,
                     [&](const Allocation& allocation) { allocation.dump(ss); });
 

@@ -46,6 +46,7 @@ lib_src = files(
 )
 
 test_src = files(
+  testdir / 'test_common.cpp',
   testdir / 'test_pmms.cpp',
   testdir / 'test_main.cpp',
   testdir / 'test_bundle.cpp',

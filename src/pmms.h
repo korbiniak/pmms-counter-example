@@ -24,6 +24,9 @@ class Pmms {
 
   static bool isEnvyFree(const Allocation& allocation,
                          const std::vector<Valuation>& valuations);
+
+  static std::vector<Allocation> getAllAllocations(
+      const std::vector<Valuation>& valuations);
 };
 
 #endif /* PMMS_H */

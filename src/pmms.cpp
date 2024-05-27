@@ -56,3 +56,23 @@ bool Pmms::isEnvyFree(const Allocation& allocation,
 
   return true;
 }
+
+std::vector<Allocation> Pmms::getAllAllocations(
+    const std::vector<Valuation>& valuations) {
+  std::vector<Allocation> result;
+#ifndef NDEBUG
+  assert(valuations.size() > 0);
+  for (int i = 0; i < valuations.size(); i++) {
+    assert(valuations[i].items() == valuations[0].items());
+  }
+#endif
+
+  int m = valuations[0].items();
+  Allocation::iter3(m, [&](const Allocation& allocation) {
+    if (isEnvyFree(allocation, valuations)) {
+      result.push_back(allocation);
+    }
+  });
+
+  return result;
+}

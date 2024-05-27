@@ -1,9 +1,13 @@
+#include "src/pmms.h"
+
+#include <string>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "src/bundle.h"
-#include "src/pmms.h"
 #include "src/valuation.h"
+#include "test/test_common.h"
 
 TEST(Pmms, Mu) {
   bundle_t b1 = Bundle::bundle({0, 1, 2});
@@ -70,4 +74,59 @@ TEST(Pmms, isEnvyFree) {
       Pmms::isEnvyFree(allocation1, {valuation1, valuation2, valuation3}));
   EXPECT_FALSE(
       Pmms::isEnvyFree(allocation1, {valuation1, valuation3, valuation2}));
+}
+
+TEST(Pmms, getAllAllocations) {
+  Valuation valuation1({1, 1, 1});
+  Valuation valuation2({1, 1, 1});
+  Valuation valuation3({1, 1, 1});
+
+  std::stringstream ss;
+
+  std::vector<Allocation> allocations =
+      Pmms::getAllAllocations({valuation1, valuation2, valuation3});
+
+  for (uint i = 0; i < allocations.size(); i++) {
+    allocations[i].dump(ss);
+  }
+
+  std::string expected = R"(0: {2, }
+1: {1, }
+2: {0, }
+0: {2, }
+1: {0, }
+2: {1, }
+0: {1, }
+1: {2, }
+2: {0, }
+0: {1, }
+1: {0, }
+2: {2, }
+0: {0, }
+1: {2, }
+2: {1, }
+0: {0, }
+1: {1, }
+2: {2, }
+)";
+  EXPECT_EQ(ss.str(), expected);
+}
+
+TEST(Pmms, getAllAllocations2) {
+  Valuation valuation1({35, 21, 21, 21, 20, 35, 10});
+  Valuation valuation2({60, 50, 50, 10, 30, 10, 100});
+  Valuation valuation3({10, 10, 10, 60, 10, 60, 100});
+
+  std::stringstream ss;
+  const std::string expected =
+      TestCommon::readFile("test/pmms-get-all-allocations.out");
+
+  std::vector<Allocation> allocations =
+      Pmms::getAllAllocations({valuation1, valuation2, valuation3});
+
+  for (uint i = 0; i < allocations.size(); i++) {
+    allocations[i].dump(ss);
+  }
+
+  EXPECT_EQ(ss.str(), expected);
 }

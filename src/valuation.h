@@ -19,5 +19,7 @@ class Valuation {
   Valuation& operator=(Valuation&& other) noexcept = default;
 
   valuation_t operator[](const bundle_t& bundle) const;
+
+  inline std::size_t items() const { return v.size(); }
 };
 #endif
