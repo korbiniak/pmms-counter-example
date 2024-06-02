@@ -1,8 +1,11 @@
 #include "src/valuation.h"
 
+#include <cassert>
 #include <vector>
 
-Valuation::Valuation(const std::vector<valuation_t>& v_) : v(v_) {}
+Valuation::Valuation(const std::vector<valuation_t>& v_) : v(v_) {
+  assert(v.size() > 0);
+}
 
 valuation_t Valuation::operator[](const bundle_t& bundle) const {
   valuation_t result = 0;

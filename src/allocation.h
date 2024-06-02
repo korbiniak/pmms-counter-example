@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "src/config.h"
+#include "src/valuation.h"
 
 class Allocation {
  private:
@@ -28,6 +29,13 @@ class Allocation {
 
   static void iter3(const size_t& m,
                     const std::function<void(const Allocation&)>& func);
+
+  valuation_t maximalEnvy(const std::vector<Valuation>& valuations);
+
+  std::vector<std::vector<valuation_t>> valuationMatrix(
+      const std::vector<Valuation>& valuations);
+
+  void debugCompatibleValuations(const std::vector<Valuation>& valuations);
 
   void dump(std::ostream& os) const;
 };

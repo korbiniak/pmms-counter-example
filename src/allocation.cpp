@@ -3,6 +3,7 @@
 #include <cassert>
 #include <vector>
 #include "bundle.h"
+#include "config.h"
 
 Allocation::Allocation(const std::vector<bundle_t>& bundles_,
                        const std::size_t& m_)
@@ -43,6 +44,48 @@ void Allocation::debugCheckIntegrity() {
   }
   assert(sum == ((1UL << m) - 1));
 #endif /* NDEBUG */
+}
+
+void Allocation::debugCompatibleValuations(
+    __attribute__((unused)) const std::vector<Valuation>& valuations) {
+  assert(valuations.size() == agents());
+  assert(valuations[0].items() == m);
+}
+
+std::vector<std::vector<valuation_t>> Allocation::valuationMatrix(
+    const std::vector<Valuation>& valuations) {
+  debugCompatibleValuations(valuations);
+
+  std::vector<std::vector<valuation_t>> matrix(
+      agents(), std::vector<valuation_t>(agents()));
+
+  for (uint i = 0; i < agents(); i++) {
+    for (uint j = 0; j < agents(); j++) {
+      matrix[i][j] = valuations[i][bundles[j]];
+    }
+  }
+
+  return matrix;
+}
+
+valuation_t Allocation::maximalEnvy(const std::vector<Valuation>& valuations) {
+  debugCompatibleValuations(valuations);
+
+  std::vector<std::vector<valuation_t>> valuation_matrix =
+      valuationMatrix(valuations);
+
+  valuation_t maximal_envy = MIN_VALUATION;
+  for (uint i = 0; i < agents(); i++) {
+    for (uint j = 0; j < agents(); j++) {
+      if (i == j) {
+        continue;
+      }
+      valuation_t envy = valuation_matrix[i][j] - valuation_matrix[i][i];
+      maximal_envy = std::max(envy, maximal_envy);
+    }
+  }
+
+  return maximal_envy;
 }
 
 void Allocation::dump(std::ostream& os) const {
