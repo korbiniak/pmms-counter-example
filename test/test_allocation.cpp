@@ -13,7 +13,7 @@ TEST(Allocation, iter3) {
   std::stringstream ss;
 
   const std::string expected =
-      TestCommon::readFile("test/allocation-iter3.out");
+      TestCommon::readFile("test/allocation-iter3.test");
   Allocation::iter3(3,
                     [&](const Allocation& allocation) { allocation.dump(ss); });
 

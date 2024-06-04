@@ -119,7 +119,7 @@ TEST(Pmms, getAllAllocations2) {
 
   std::stringstream ss;
   const std::string expected =
-      TestCommon::readFile("test/pmms-get-all-allocations.out");
+      TestCommon::readFile("test/pmms-get-all-allocations.test");
 
   std::vector<Allocation> allocations =
       Pmms::getAllAllocations({valuation1, valuation2, valuation3});
