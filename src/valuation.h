@@ -24,13 +24,7 @@ class Valuation {
 
   inline std::size_t length() const { return m; }
 
-  inline std::vector<valuation_t> get_v() const {
-    std::vector<valuation_t> result;
-    for (std::size_t i = 0; i < m; i++) {
-      result.push_back(v[1 << i]);
-    }
-    return result;
-  }
+  std::vector<valuation_t> get_v() const;
 
   /* TODO: This won't work well if valuation_t is not floating point. */
   Valuation& normalize(const valuation_t& normal_value = 1);

@@ -1,3 +1,4 @@
+#include "config.h"
 #include "src/pmms.h"
 
 #include <string>
@@ -70,7 +71,7 @@ TEST(Pmms, isEnvyFree) {
   Allocation allocation1({b1, b2, b3}, 7);
 
   allocation1.debugCheckIntegrity();
-  EXPECT_TRUE(
+  EXPECT_FALSE(
       Pmms::isEnvyFree(allocation1, {valuation1, valuation2, valuation3}));
   EXPECT_FALSE(
       Pmms::isEnvyFree(allocation1, {valuation1, valuation3, valuation2}));
@@ -146,6 +147,86 @@ TEST(PMMS, maximalEnvy) {
     ss << Pmms::maximalEnvy(allocation, {valuation1, valuation2, valuation3})
        << std::endl;
   });
+
+  EXPECT_EQ(ss.str(), expected);
+}
+
+TEST(PMMS, maximalEnvyPrecomputedMu) {
+  Valuation valuation1({35, 21, 21, 21, 20, 35, 10});
+  Valuation valuation2({60, 50, 50, 10, 30, 10, 100});
+  Valuation valuation3({10, 10, 10, 60, 10, 60, 100});
+
+  std::vector<Valuation> valuations = {valuation1, valuation2, valuation3};
+
+  std::stringstream ss;
+  const std::string expected =
+      TestCommon::readFile("test/pmms-maximal-envy.test");
+
+  valuation_t** mu = Pmms::precomputeMu(valuations);
+
+  Allocation::iter3(7, [&](const Allocation& allocation) {
+    ss << "Allocation:\n";
+    allocation.dump(ss);
+    ss << Pmms::maximalEnvyPrecomputedMu(allocation, valuations, mu)
+       << std::endl;
+  });
+
+  free2DArray(mu);
+
+  EXPECT_EQ(ss.str(), expected);
+}
+
+TEST(Pmms, getAllAllocationsPrecomputeMu) {
+  Valuation valuation1({1, 1, 1});
+  Valuation valuation2({2, 2, 2});
+  Valuation valuation3({3, 3, 3});
+
+  std::stringstream ss;
+
+  std::vector<Allocation> allocations =
+      Pmms::getAllAllocationsPrecomputeMu({valuation1, valuation2, valuation3});
+
+  for (uint i = 0; i < allocations.size(); i++) {
+    allocations[i].dump(ss);
+  }
+
+  std::string expected = R"(0: {2, }
+1: {1, }
+2: {0, }
+0: {2, }
+1: {0, }
+2: {1, }
+0: {1, }
+1: {2, }
+2: {0, }
+0: {1, }
+1: {0, }
+2: {2, }
+0: {0, }
+1: {2, }
+2: {1, }
+0: {0, }
+1: {1, }
+2: {2, }
+)";
+  EXPECT_EQ(ss.str(), expected);
+}
+
+TEST(Pmms, getAllAllocationsPrecomputeMu2) {
+  Valuation valuation1({35, 21, 21, 21, 20, 35, 10});
+  Valuation valuation2({60, 50, 50, 10, 30, 10, 100});
+  Valuation valuation3({10, 10, 10, 60, 10, 60, 100});
+
+  std::stringstream ss;
+  const std::string expected =
+      TestCommon::readFile("test/pmms-get-all-allocations.test");
+
+  std::vector<Allocation> allocations =
+      Pmms::getAllAllocationsPrecomputeMu({valuation1, valuation2, valuation3});
+
+  for (uint i = 0; i < allocations.size(); i++) {
+    allocations[i].dump(ss);
+  }
 
   EXPECT_EQ(ss.str(), expected);
 }

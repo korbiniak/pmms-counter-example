@@ -18,6 +18,25 @@ static void BM_PmmsGetAllAllocations(benchmark::State& state) {
   }
 }
 
+static void BM_PmmsGetAllAllocationsPrecomputeMu(benchmark::State& state) {
+  int range = state.range(0);
+
+  Valuation valuation1 =
+      Valuation(std::vector<valuation_t>(range, 1)).normalize();
+  Valuation valuation2 =
+      Valuation(std::vector<valuation_t>(range, 1)).normalize();
+  Valuation valuation3 =
+      Valuation(std::vector<valuation_t>(range, 1)).normalize();
+
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(Pmms::getAllAllocationsPrecomputeMu(
+        {valuation1, valuation2, valuation3}));
+  }
+}
+
 BENCHMARK(BM_PmmsGetAllAllocations)->DenseRange(6, 12)->MinTime(2.0);
+BENCHMARK(BM_PmmsGetAllAllocationsPrecomputeMu)
+    ->DenseRange(6, 12)
+    ->MinTime(2.0);
 
 BENCHMARK_MAIN();
