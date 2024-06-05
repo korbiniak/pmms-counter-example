@@ -18,6 +18,6 @@ static void BM_PmmsGetAllAllocations(benchmark::State& state) {
   }
 }
 
-BENCHMARK(BM_PmmsGetAllAllocations)->DenseRange(6, 12);
+BENCHMARK(BM_PmmsGetAllAllocations)->DenseRange(6, 12)->MinTime(2.0);
 
 BENCHMARK_MAIN();
