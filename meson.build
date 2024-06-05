@@ -9,6 +9,12 @@ project(
   ],
 )
 
+cmake = import('cmake')
+opt_var = cmake.subproject_options()
+opt_var.add_cmake_defines({'BENCHMARK_ENABLE_GTEST_TESTS': 'OFF'})
+libgooglebench = cmake.subproject('libgoogle_benchmark', options: opt_var)
+
+
 add_project_arguments(
   [
     '-Wshadow',
@@ -33,6 +39,7 @@ endif
 
 srcdir = 'src'
 testdir = 'test'
+benchmarkdir = 'benchmark'
 
 inc_dir = include_directories('src')
 
@@ -54,6 +61,10 @@ test_src = files(
   testdir / 'test_allocation.cpp',
 )
 
+benchmark_src = files(
+  benchmarkdir / 'benchmark_pmms.cpp'
+)
+
 app_src = files(srcdir / 'main.cpp')
 
 test_executable = executable(
@@ -63,5 +74,12 @@ test_executable = executable(
   include_directories: inc_dir
 )
 
+
 test('all_tests', test_executable, workdir : meson.source_root())
 executable('main', [lib_src, app_src], include_directories: inc_dir)
+executable(
+  'benchmark_main', 
+  [lib_src, benchmark_src],
+  include_directories: inc_dir,
+  dependencies: [ libgooglebench.dependency('benchmark') ]
+)
