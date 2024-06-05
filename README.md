@@ -3,7 +3,7 @@
 Todo:
 
 - [x] Implement allocation generation for given valuations.
-- [ ] Measure envy and search for allocation with maximal minimal envy.
+- [x] Measure envy and search for allocation with minimal maximal envy.
 - [ ] Implement random valuation generation.
 - [ ] Benchmark.
 - [ ] Implement heuristic algorithms for finding an allocation.

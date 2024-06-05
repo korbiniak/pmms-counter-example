@@ -7,6 +7,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace ::testing;
+
 class TestCommon {
  public:
   static std::string readFile(const std::string& filePath);

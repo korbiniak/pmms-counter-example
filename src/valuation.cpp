@@ -16,3 +16,15 @@ valuation_t Valuation::operator[](const bundle_t& bundle) const {
   }
   return result;
 }
+
+Valuation& Valuation::normalize(const valuation_t& normal_value) {
+  valuation_t sum = 0;
+  for (const auto& item : v) {
+    sum += item;
+  }
+  for (auto& item : v) {
+    item = (item * normal_value) / sum;
+  }
+
+  return *this;
+}

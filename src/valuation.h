@@ -20,6 +20,12 @@ class Valuation {
 
   valuation_t operator[](const bundle_t& bundle) const;
 
-  inline std::size_t items() const { return v.size(); }
+  inline std::size_t length() const { return v.size(); }
+
+  inline std::vector<valuation_t> get_v() const { return v; }
+
+  /* TODO: This won't work well if valuation_t is not floating point. */
+  Valuation& normalize(const valuation_t& normal_value = 1);
 };
+
 #endif

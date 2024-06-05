@@ -47,13 +47,13 @@ void Allocation::debugCheckIntegrity() {
 }
 
 void Allocation::debugCompatibleValuations(
-    __attribute__((unused)) const std::vector<Valuation>& valuations) {
+    __attribute__((unused)) const std::vector<Valuation>& valuations) const {
   assert(valuations.size() == agents());
   assert(valuations[0].items() == m);
 }
 
 std::vector<std::vector<valuation_t>> Allocation::valuationMatrix(
-    const std::vector<Valuation>& valuations) {
+    const std::vector<Valuation>& valuations) const {
   debugCompatibleValuations(valuations);
 
   std::vector<std::vector<valuation_t>> matrix(
@@ -68,32 +68,12 @@ std::vector<std::vector<valuation_t>> Allocation::valuationMatrix(
   return matrix;
 }
 
-valuation_t Allocation::maximalEnvy(const std::vector<Valuation>& valuations) {
-  debugCompatibleValuations(valuations);
-
-  std::vector<std::vector<valuation_t>> valuation_matrix =
-      valuationMatrix(valuations);
-
-  valuation_t maximal_envy = MIN_VALUATION;
-  for (uint i = 0; i < agents(); i++) {
-    for (uint j = 0; j < agents(); j++) {
-      if (i == j) {
-        continue;
-      }
-      valuation_t envy = valuation_matrix[i][j] - valuation_matrix[i][i];
-      maximal_envy = std::max(envy, maximal_envy);
-    }
-  }
-
-  return maximal_envy;
-}
-
 void Allocation::dump(std::ostream& os) const {
   for (std::size_t i = 0; i < agents(); i++) {
     os << i << ": {";
     for (auto j : Bundle::toItemsList(bundles[i], m)) {
       os << j << ", ";
     }
-    os << "}\n";
+    os << "}" << std::endl;
   }
 }

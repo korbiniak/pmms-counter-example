@@ -130,3 +130,22 @@ TEST(Pmms, getAllAllocations2) {
 
   EXPECT_EQ(ss.str(), expected);
 }
+
+TEST(PMMS, maximalEnvy) {
+  Valuation valuation1({35, 21, 21, 21, 20, 35, 10});
+  Valuation valuation2({60, 50, 50, 10, 30, 10, 100});
+  Valuation valuation3({10, 10, 10, 60, 10, 60, 100});
+
+  std::stringstream ss;
+  const std::string expected =
+      TestCommon::readFile("test/pmms-maximal-envy.test");
+
+  Allocation::iter3(7, [&](const Allocation& allocation) {
+    ss << "Allocation:\n";
+    allocation.dump(ss);
+    ss << Pmms::maximalEnvy(allocation, {valuation1, valuation2, valuation3})
+       << std::endl;
+  });
+
+  EXPECT_EQ(ss.str(), expected);
+}

@@ -67,7 +67,7 @@ std::vector<Allocation> Pmms::getAllAllocations(
   }
 #endif
 
-  int m = valuations[0].items();
+  int m = valuations[0].length();
   Allocation::iter3(m, [&](const Allocation& allocation) {
     if (isEnvyFree(allocation, valuations)) {
       result.push_back(allocation);
@@ -75,4 +75,26 @@ std::vector<Allocation> Pmms::getAllAllocations(
   });
 
   return result;
+}
+
+valuation_t Pmms::maximalEnvy(const Allocation& allocation,
+                              const std::vector<Valuation>& valuations) {
+  valuation_t maximal_envy = MIN_VALUATION;
+  for (uint i = 0; i < allocation.agents(); i++) {
+    valuation_t maximal_mu_value = MIN_VALUATION;
+    for (uint j = 0; j < allocation.agents(); j++) {
+      if (i == j) {
+        continue;
+      }
+
+      maximal_mu_value =
+          std::max(maximal_mu_value,
+                   muValue(allocation[i], allocation[j], valuations[i]));
+    }
+
+    maximal_envy =
+        std::max(maximal_envy, maximal_mu_value - valuations[i][allocation[i]]);
+  }
+
+  return maximal_envy;
 }
