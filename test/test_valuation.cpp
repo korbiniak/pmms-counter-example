@@ -12,6 +12,7 @@ TEST(Valuation, All) {
   EXPECT_EQ(valuation[Bundle::bundle({1, 3, 5})], 12);
 }
 
+#ifndef VALUATION_T_INT64
 TEST(Valuation, Normalize) {
   Valuation valuation({1, 2, 3, 4, 5, 6});
   EXPECT_THAT(valuation.normalize(21).get_v(), ElementsAre(1, 2, 3, 4, 5, 6));
@@ -23,3 +24,4 @@ TEST(Valuation, Normalize) {
           DoubleNear(0.142857, 0.000001), DoubleNear(0.190476, 0.000001),
           DoubleNear(0.238095, 0.000001), DoubleNear(0.285714, 0.000001)));
 }
+#endif /* VALUATION_T_INT64 */
