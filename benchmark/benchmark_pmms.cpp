@@ -1,17 +1,23 @@
 #include <benchmark/benchmark.h>
-#include "allocation.h"
-#include "pmms.h"
-#include "valuation.h"
+#include "src/allocation.h"
+#include "src/pmms.h"
+#include "src/valuation.h"
 
-static void BM_VectorPushBack(benchmark::State& state) {
-    for (auto _ : state) {
-        std::vector<int> v;
-        for (int i = 0; i < state.range(0); ++i) {
-            v.push_back(i);
-        }
-    }
+static void BM_PmmsGetAllAllocations(benchmark::State& state) {
+  int range = state.range(0);
+
+  Valuation valuation1 =
+      Valuation(std::vector<valuation_t>(range, 1)).normalize();
+  Valuation valuation2 =
+      Valuation(std::vector<valuation_t>(range, 1)).normalize();
+  Valuation valuation3 =
+      Valuation(std::vector<valuation_t>(range, 1)).normalize();
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(
+        Pmms::getAllAllocations({valuation1, valuation2, valuation3}));
+  }
 }
-BENCHMARK(BM_VectorPushBack)->Range(8, 8<<10);
+
+BENCHMARK(BM_PmmsGetAllAllocations)->DenseRange(6, 12);
 
 BENCHMARK_MAIN();
- 

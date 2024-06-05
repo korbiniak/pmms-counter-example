@@ -1,0 +1,2 @@
+option('profiling', type: 'boolean', value: false, description: 'Enable profiling with gprof')
+

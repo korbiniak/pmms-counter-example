@@ -1,5 +1,6 @@
 #include "src/pmms.h"
 
+#include <cassert>
 #include <iostream>
 
 #include "src/config.h"
@@ -62,8 +63,8 @@ std::vector<Allocation> Pmms::getAllAllocations(
   std::vector<Allocation> result;
 #ifndef NDEBUG
   assert(valuations.size() > 0);
-  for (int i = 0; i < valuations.size(); i++) {
-    assert(valuations[i].items() == valuations[0].items());
+  for (uint i = 0; i < valuations.size(); i++) {
+    assert(valuations[i].length() == valuations[0].length());
   }
 #endif
 

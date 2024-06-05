@@ -14,7 +14,6 @@ opt_var = cmake.subproject_options()
 opt_var.add_cmake_defines({'BENCHMARK_ENABLE_GTEST_TESTS': 'OFF'})
 libgooglebench = cmake.subproject('libgoogle_benchmark', options: opt_var)
 
-
 add_project_arguments(
   [
     '-Wshadow',
@@ -35,6 +34,12 @@ elif get_option('buildtype') == 'release'
      ],
      language: 'cpp'
    )
+endif
+
+profiling = get_option('profiling')
+if profiling
+  add_project_arguments('-pg', language: 'cpp')
+  add_project_link_arguments('-pg', language: 'cpp')
 endif
 
 srcdir = 'src'

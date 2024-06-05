@@ -39,8 +39,8 @@ void Allocation::debugCheckIntegrity() {
 #ifndef NDEBUG
   bundle_t sum = 0;
   for (const auto& bundle : bundles) {
-    assert(sum & (bundle == 0));
-    sum &= bundle;
+    assert((sum & bundle) == 0);
+    sum |= bundle;
   }
   assert(sum == ((1UL << m) - 1));
 #endif /* NDEBUG */
@@ -49,7 +49,7 @@ void Allocation::debugCheckIntegrity() {
 void Allocation::debugCompatibleValuations(
     __attribute__((unused)) const std::vector<Valuation>& valuations) const {
   assert(valuations.size() == agents());
-  assert(valuations[0].items() == m);
+  assert(valuations[0].length() == m);
 }
 
 std::vector<std::vector<valuation_t>> Allocation::valuationMatrix(
