@@ -49,10 +49,19 @@ valuation_t Valuation::operator[](const bundle_t& bundle) const {
   return v[bundle];
 }
 
+std::vector<valuation_t> Valuation::get_v() const {
+  std::vector<valuation_t> result;
+
+  for (std::size_t i = 0; i < m; i++) {
+    result.push_back(v[1 << i]);
+  }
+  return result;
+}
+
 Valuation& Valuation::normalize(const valuation_t& normal_value) {
   valuation_t sum = v[(1 << m) - 1];
 
-  for (int mask = 0; mask < (int)m; mask++) {
+  for (int mask = 0; mask < (1 << m); mask++) {
     v[mask] = v[mask] * normal_value / sum;
   }
 

@@ -22,4 +22,22 @@ static constexpr valuation_t MAX_VALUATION =
 
 using bundle_t = uint32_t;
 
+template <typename T>
+T** create2DArray(std::size_t n, std::size_t m) {
+  T* data = new T[n * m];
+  T** array = new T*[n];
+
+  for (std::size_t i = 0; i < n; ++i) {
+    array[i] = data + i * m;
+  }
+
+  return array;
+}
+
+template <typename T>
+void free2DArray(T** array) {
+  delete[] array[0];
+  delete[] array;
+}
+
 #endif /* CONFIG_H */
