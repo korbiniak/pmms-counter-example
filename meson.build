@@ -55,6 +55,7 @@ lib_src = files(
   srcdir / 'valuation.cpp',
   srcdir / 'pmms.cpp',
   srcdir / 'allocation.cpp',
+  srcdir / 'generator.cpp',
 )
 
 test_src = files(
@@ -64,6 +65,7 @@ test_src = files(
   testdir / 'test_bundle.cpp',
   testdir / 'test_valuation.cpp',
   testdir / 'test_allocation.cpp',
+  testdir / 'test_generator.cpp',
 )
 
 benchmark_src = files(
@@ -82,6 +84,7 @@ test_executable = executable(
 
 test('all_tests', test_executable, workdir : meson.source_root())
 executable('main', [lib_src, app_src], include_directories: inc_dir)
+executable('main_int', [lib_src, app_src], include_directories: inc_dir, cpp_args: '-DVALUATION_T_INT64')
 executable(
   'benchmark_main', 
   [lib_src, benchmark_src],

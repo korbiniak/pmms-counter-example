@@ -4,26 +4,27 @@
 #include <stdint.h>
 #include <limits>
 
-#ifndef VALUATION_T_INT64
-
-using valuation_t = double;
-static constexpr valuation_t MIN_VALUATION =
-    -std::numeric_limits<double>::max();
-static constexpr valuation_t MAX_VALUATION = std::numeric_limits<double>::max();
-
-#else
+#ifdef VALUATION_T_INT64
 
 using valuation_t = int64_t;
 static constexpr valuation_t MIN_VALUATION =
     std::numeric_limits<valuation_t>::min();
 static constexpr valuation_t MAX_VALUATION =
     std::numeric_limits<valuation_t>::max();
+
+#else
+
+using valuation_t = double;
+static constexpr valuation_t MIN_VALUATION =
+    -std::numeric_limits<double>::max();
+static constexpr valuation_t MAX_VALUATION = std::numeric_limits<double>::max();
+
 #endif /* VALUATION_T_INT64 */
 
 using bundle_t = uint32_t;
 
 template <typename T>
-T** create2DArray(std::size_t n, std::size_t m) {
+T** create2DArray(const std::size_t& n, const std::size_t& m) {
   T* data = new T[n * m];
   T** array = new T*[n];
 

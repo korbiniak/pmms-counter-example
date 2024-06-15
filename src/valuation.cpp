@@ -2,12 +2,13 @@
 
 #include <stdint.h>
 #include <cassert>
+#include <memory>
 #include <vector>
 
 Valuation::Valuation(const std::vector<valuation_t>& v_) : m(v_.size()) {
   assert(v_.size() > 0);
   std::size_t sz = (1 << v_.size());
-  v = new valuation_t[sz];
+  v = std::unique_ptr<valuation_t[]>(new valuation_t[sz]);
   for (int mask = 0; mask < (int)sz; mask++) {
     v[mask] = 0;
     for (int i = 0; i < (int)m; i++) {
@@ -19,7 +20,7 @@ Valuation::Valuation(const std::vector<valuation_t>& v_) : m(v_.size()) {
 }
 
 Valuation::Valuation(const Valuation& other) : m(other.m) {
-  v = new valuation_t[(1 << m)];
+  v = std::unique_ptr<valuation_t[]>(new valuation_t[(1 << m)]);
   for (int mask = 0; mask < (1 << m); mask++) {
     v[mask] = other.v[mask];
   }
@@ -30,10 +31,8 @@ Valuation& Valuation::operator=(const Valuation& other) {
     return *this;
   }
 
-  delete[] v;
-
   m = other.m;
-  v = new valuation_t[(1 << m)];
+  v = std::unique_ptr<valuation_t[]>(new valuation_t[(1 << m)]);
   for (int mask = 0; mask < (1 << m); mask++) {
     v[mask] = other.v[mask];
   }
@@ -41,12 +40,20 @@ Valuation& Valuation::operator=(const Valuation& other) {
   return *this;
 }
 
-Valuation::~Valuation() {
-  delete v;
-}
-
 valuation_t Valuation::operator[](const bundle_t& bundle) const {
   return v[bundle];
+}
+
+bool Valuation::operator==(const Valuation& other) const {
+  if (m != other.m) {
+    return false;
+  }
+  for (std::size_t i = 0; i < m; i++) {
+    if (v[1 << i] != other.v[1 << i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::vector<valuation_t> Valuation::get_v() const {

@@ -1,6 +1,7 @@
 #ifndef VALUATION_H
 #define VALUATION_H
 
+#include <memory>
 #include <vector>
 
 #include "src/bundle.h"
@@ -10,7 +11,7 @@
 class Valuation {
  private:
   std::size_t m;
-  valuation_t* v;
+  std::unique_ptr<valuation_t[]> v;
 
  public:
   Valuation(const std::vector<valuation_t>& v_);
@@ -18,9 +19,11 @@ class Valuation {
   Valuation(Valuation&& other) noexcept = default;
   Valuation& operator=(const Valuation& other);
   Valuation& operator=(Valuation&& other) noexcept = default;
-  ~Valuation();
+  ~Valuation() = default;
 
   valuation_t operator[](const bundle_t& bundle) const;
+
+  bool operator==(const Valuation& other) const;
 
   inline std::size_t length() const { return m; }
 
