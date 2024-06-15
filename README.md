@@ -5,10 +5,10 @@ Todo:
 - [x] Implement allocation generation for given valuations.
 - [x] Measure envy and search for allocation with minimal maximal envy.
 - [x] Benchmark.
-- [ ] Implement random valuation generation.
+- [x] Implement random valuation generation.
+- [x] Add multithreading for allocation searching.
 - [ ] Implement heuristic algorithms for finding an allocation.
 - [ ] Implement mu function in pseudopolynomial time.
-- [ ] Add multithreading for allocation searching.
 - [ ] Implement iteration over all allocations for any number of agents.
 
 ## Building and running
