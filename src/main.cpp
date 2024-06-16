@@ -67,14 +67,15 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
       std::cout << cnt << " valuations checked on thread " << thread_nr
                 << std::endl;
     }
+    int current_min = min_count.load();
+
     std::vector<Valuation> valuations =
         generator.generateRandomValuations(n, m, min_val, max_val);
 
     std::vector<Allocation> allocations =
-        Pmms::getAllAllocationsPrecomputeMu(valuations);
+        Pmms::getAllAllocationsPrecomputeMu(valuations, current_min);
 
     int current = (int)allocations.size();
-    int current_min = min_count.load();
 
     while (current < current_min) {
       if (min_count.compare_exchange_weak(current_min, current)) {

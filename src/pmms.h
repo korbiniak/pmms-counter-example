@@ -30,11 +30,13 @@ class Pmms {
   static bool isEnvyFree(const Allocation& allocation,
                          const std::vector<Valuation>& valuations);
 
+  /* If at_most = 0, then search for all allocations, otherwise exit early if
+     found at_most already. */
   static std::vector<Allocation> getAllAllocations(
-      const std::vector<Valuation>& valuations);
+      const std::vector<Valuation>& valuations, const std::size_t& at_most = 0);
 
   static std::vector<Allocation> getAllAllocationsPrecomputeMu(
-      const std::vector<Valuation>& valuations);
+      const std::vector<Valuation>& valuations, const std::size_t& at_most = 0);
 
   /* For given allocation find the maximal value over all i, j of
      \mu_i(X_i + X_j, 2) - v_i(X_i).  */

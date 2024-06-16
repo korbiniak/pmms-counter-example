@@ -12,10 +12,13 @@
 TEST(Allocation, iter3) {
   std::stringstream ss;
 
+  std::size_t cnt = 0;
   const std::string expected =
       TestCommon::readFile("test/allocation-iter3.test");
-  Allocation::iter3(3,
-                    [&](const Allocation& allocation) { allocation.dump(ss); });
+  Allocation::iter3(3, [&](const Allocation& allocation) {
+    allocation.dump(ss);
+    return (++cnt <= 3);
+  });
 
   EXPECT_EQ(ss.str(), expected);
 }

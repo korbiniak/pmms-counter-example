@@ -25,12 +25,14 @@ const bundle_t& Allocation::operator[](const std::size_t& idx) const {
 }
 
 void Allocation::iter3(const size_t& m,
-                       const std::function<void(const Allocation&)>& func) {
+                       const std::function<bool(const Allocation&)>& func) {
   bundle_t all_items = (1 << m) - 1;
   BUNDLE_LOOP(first, all_items, {
     BUNDLE_LOOP(second, (~first) & all_items, {
       bundle_t third = ~first & (~second) & all_items;
-      func(Allocation({first, second, third}, m));
+      if (!func(Allocation({first, second, third}, m))) {
+        return;
+      }
     });
   });
 }

@@ -67,7 +67,7 @@ bool Pmms::isEnvyFree(const Allocation& allocation,
 }
 
 std::vector<Allocation> Pmms::getAllAllocations(
-    const std::vector<Valuation>& valuations) {
+    const std::vector<Valuation>& valuations, const std::size_t& at_most) {
   std::vector<Allocation> result;
 #ifndef NDEBUG
   assert(valuations.size() == 3);
@@ -77,17 +77,22 @@ std::vector<Allocation> Pmms::getAllAllocations(
 #endif
 
   int m = valuations[0].length();
+  std::size_t found = 0;
   Allocation::iter3(m, [&](const Allocation& allocation) {
     if (isEnvyFree(allocation, valuations)) {
       result.push_back(allocation);
+      if (at_most > 0 && ++found >= at_most) {
+        return false;
+      }
     }
+    return true;
   });
 
   return result;
 }
 
 std::vector<Allocation> Pmms::getAllAllocationsPrecomputeMu(
-    const std::vector<Valuation>& valuations) {
+    const std::vector<Valuation>& valuations, const std::size_t& at_most) {
   std::vector<Allocation> result;
 #ifndef NDEBUG
   assert(valuations.size() == 3);
@@ -98,10 +103,15 @@ std::vector<Allocation> Pmms::getAllAllocationsPrecomputeMu(
 
   valuation_t** mu = precomputeMu(valuations);
   int m = valuations[0].length();
+  std::size_t found = 0;
   Allocation::iter3(m, [&](const Allocation& allocation) {
     if (maximalEnvyPrecomputedMu(allocation, valuations, mu) <= 0.) {
       result.push_back(allocation);
+      if (at_most > 0 && ++found >= at_most) {
+        return false;
+      }
     }
+    return true;
   });
 
   free2DArray(mu);

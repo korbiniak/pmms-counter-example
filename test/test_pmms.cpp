@@ -146,6 +146,7 @@ TEST(PMMS, maximalEnvy) {
     allocation.dump(ss);
     ss << Pmms::maximalEnvy(allocation, {valuation1, valuation2, valuation3})
        << std::endl;
+    return true;
   });
 
   EXPECT_EQ(ss.str(), expected);
@@ -169,6 +170,7 @@ TEST(PMMS, maximalEnvyPrecomputedMu) {
     allocation.dump(ss);
     ss << Pmms::maximalEnvyPrecomputedMu(allocation, valuations, mu)
        << std::endl;
+    return true;
   });
 
   free2DArray(mu);

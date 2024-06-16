@@ -27,8 +27,10 @@ class Allocation {
   bundle_t& operator[](const std::size_t& idx);
   const bundle_t& operator[](const std::size_t& idx) const;
 
+  /* Iterate over all allocations for 3 agents and m items. This
+     terminates early if [func] returns [false] at any point. */
   static void iter3(const size_t& m,
-                    const std::function<void(const Allocation&)>& func);
+                    const std::function<bool(const Allocation&)>& func);
 
   std::vector<std::vector<valuation_t>> valuationMatrix(
       const std::vector<Valuation>& valuations) const;
