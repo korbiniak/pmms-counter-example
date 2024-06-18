@@ -3,17 +3,19 @@
 #include <cassert>
 #include <iostream>
 
+#include "allocation.h"
 #include "src/config.h"
 
+namespace Pmms {
 /* TODO: This could be done much faster if we used ints for valuation +
    the sum of items is low. */
-std::pair<bundle_t, bundle_t> Pmms::mu(const bundle_t& b1, const bundle_t& b2,
-                                       const Valuation& valuation) {
+std::pair<bundle_t, bundle_t> mu(const bundle_t& b1, const bundle_t& b2,
+                                 const Valuation& valuation) {
   return mu(b1 | b2, valuation);
 }
 
-std::pair<bundle_t, bundle_t> Pmms::mu(const bundle_t& b,
-                                       const Valuation& valuation) {
+std::pair<bundle_t, bundle_t> mu(const bundle_t& b,
+                                 const Valuation& valuation) {
   bundle_t best_bundle = 0;
   valuation_t entire_value = valuation[b];
   valuation_t best_value = 0;
@@ -32,22 +34,22 @@ std::pair<bundle_t, bundle_t> Pmms::mu(const bundle_t& b,
   return {best_bundle, b & (~best_bundle)};
 }
 
-valuation_t Pmms::muValue(const bundle_t& b1, const bundle_t& b2,
-                          const Valuation& valuation) {
+valuation_t muValue(const bundle_t& b1, const bundle_t& b2,
+                    const Valuation& valuation) {
   return valuation[mu(b1 | b2, valuation).first];
 }
 
-valuation_t Pmms::muValue(const bundle_t& b, const Valuation& valuation) {
+valuation_t muValue(const bundle_t& b, const Valuation& valuation) {
   return valuation[mu(b, valuation).first];
 }
 
-bool Pmms::isEnvious(const bundle_t& b1, const bundle_t& b2,
-                     const Valuation& valuation) {
+bool isEnvious(const bundle_t& b1, const bundle_t& b2,
+               const Valuation& valuation) {
   return valuation[b1] < muValue(b1, b2, valuation);
 }
 
-bool Pmms::isEnvyFree(const Allocation& allocation,
-                      const std::vector<Valuation>& valuations) {
+bool isEnvyFree(const Allocation& allocation,
+                const std::vector<Valuation>& valuations) {
   int n = allocation.agents();
   std::vector<valuation_t> values(n);
 
@@ -66,7 +68,7 @@ bool Pmms::isEnvyFree(const Allocation& allocation,
   return true;
 }
 
-std::vector<Allocation> Pmms::getAllAllocations(
+std::vector<Allocation> getAllAllocations(
     const std::vector<Valuation>& valuations, const std::size_t& at_most) {
   std::vector<Allocation> result;
 #ifndef NDEBUG
@@ -91,7 +93,7 @@ std::vector<Allocation> Pmms::getAllAllocations(
   return result;
 }
 
-std::vector<Allocation> Pmms::getAllAllocationsPrecomputeMu(
+std::vector<Allocation> getAllAllocationsPrecomputeMu(
     const std::vector<Valuation>& valuations, const std::size_t& at_most) {
   std::vector<Allocation> result;
 #ifndef NDEBUG
@@ -118,8 +120,8 @@ std::vector<Allocation> Pmms::getAllAllocationsPrecomputeMu(
   return result;
 }
 
-valuation_t Pmms::maximalEnvy(const Allocation& allocation,
-                              const std::vector<Valuation>& valuations) {
+valuation_t maximalEnvy(const Allocation& allocation,
+                        const std::vector<Valuation>& valuations) {
   valuation_t maximal_envy = MIN_VALUATION;
   for (uint i = 0; i < allocation.agents(); i++) {
     valuation_t maximal_mu_value = MIN_VALUATION;
@@ -140,7 +142,7 @@ valuation_t Pmms::maximalEnvy(const Allocation& allocation,
   return maximal_envy;
 }
 
-valuation_t** Pmms::precomputeMu(const std::vector<Valuation>& valuations) {
+valuation_t** precomputeMu(const std::vector<Valuation>& valuations) {
   size_t m = valuations[0].length();
   valuation_t** mu = create2DArray<valuation_t>(valuations.size(), 1 << m);
 
@@ -153,9 +155,9 @@ valuation_t** Pmms::precomputeMu(const std::vector<Valuation>& valuations) {
   return mu;
 }
 
-valuation_t Pmms::maximalEnvyPrecomputedMu(
-    const Allocation& allocation, const std::vector<Valuation>& valuations,
-    valuation_t** precomputed_mu) {
+valuation_t maximalEnvyPrecomputedMu(const Allocation& allocation,
+                                     const std::vector<Valuation>& valuations,
+                                     valuation_t** precomputed_mu) {
   valuation_t maximal_envy = MIN_VALUATION;
   for (uint i = 0; i < allocation.agents(); i++) {
     valuation_t maximal_mu_value = MIN_VALUATION;
@@ -174,3 +176,21 @@ valuation_t Pmms::maximalEnvyPrecomputedMu(
 
   return maximal_envy;
 }
+
+valuation_t minimalEnvyOverAllAllocations(
+    const std::vector<Valuation>& valuations) {
+  valuation_t** mu = precomputeMu(valuations);
+  valuation_t min_envy = MAX_VALUATION;
+  Allocation::iter3(valuations[0].length(), [&](const Allocation& allocation) {
+    valuation_t envy = maximalEnvyPrecomputedMu(allocation, valuations, mu);
+    if (envy < min_envy) {
+      min_envy = envy;
+    }
+    /* Always proceed to the next allocation. */
+    return true;
+  });
+  free2DArray(mu);
+
+  return min_envy;
+}
+}; /* namespace Pmms */
