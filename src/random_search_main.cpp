@@ -63,7 +63,7 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
   std::cout << "Starting on thread " << thread_nr << std::endl;
 
   for (int cnt = 0;; cnt++) {
-    if (cnt % 100000 == 0) {
+    if (cnt % 5000000 == 0) {
       std::cout << cnt << " valuations checked on thread " << thread_nr
                 << std::endl;
     }
