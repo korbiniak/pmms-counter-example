@@ -19,6 +19,7 @@ struct Args {
   valuation_t min_val;
   valuation_t max_val;
   Generator generator;
+  bool monotone;
 };
 
 std::size_t get_max_number_width(valuation_t max_val) {
@@ -57,6 +58,7 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
   valuation_t min_val = args.min_val;
   valuation_t max_val = args.max_val;
   Generator& generator = args.generator;
+  bool monotone = args.monotone;
   const std::size_t number_width = get_max_number_width(max_val);
 
   // pinToCpu(thread_nr);
@@ -69,8 +71,12 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
     }
     int current_min = min_count.load();
 
-    std::vector<Valuation> valuations =
-        generator.generateRandomValuations(n, m, min_val, max_val);
+    std::vector<Valuation> valuations;
+    if (monotone) {
+      valuations = generator.monotoneValuations(n, m, min_val, max_val);
+    } else {
+      valuations = generator.additiveValuations(n, m, min_val, max_val);
+    }
 
     std::vector<Allocation> allocations =
         Pmms::getAllAllocationsPrecomputeMu(valuations, current_min);
@@ -112,7 +118,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
       "max", "Maximum valuation value",
       cxxopts::value<valuation_t>()->default_value("100"))(
       "p,threads", "Number of threads to run on",
-      cxxopts::value<int>()->default_value("1"));
+      cxxopts::value<int>()->default_value("1"))("monotone",
+                                                 "Use monotone valuations.");
 
   auto result = options.parse(argc, argv);
 
@@ -126,6 +133,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   int threads_num = result["threads"].as<int>();
   valuation_t min_val = result["min"].as<valuation_t>();
   valuation_t max_val = result["max"].as<valuation_t>();
+  bool monotone = result.count("monotone");
 
   if (n != 3) {
     std::cerr << "Only 3 agents are supported now." << std::endl;
@@ -154,7 +162,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
                  .thread_nr = i,
                  .min_val = min_val,
                  .max_val = max_val,
-                 .generator = Generator()};
+                 .generator = Generator(),
+                 .monotone = monotone};
     threads.emplace_back(randomValuationAllocationsCount, args,
                          std::ref(min_allocs), std::ref(log_mtx));
   }

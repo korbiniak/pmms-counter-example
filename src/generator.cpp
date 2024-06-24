@@ -13,27 +13,71 @@ Generator::Generator(int seed_) {
   gen = std::mt19937(seed_);
 }
 
-std::vector<Valuation> Generator::generateRandomValuations(
-    const std::size_t& agents, const std::size_t& items, const valuation_t& min,
-    const valuation_t& max, valuation_t normalize) {
+Valuation Generator::additiveValuation(const std::size_t& items,
+                                       const valuation_t& min,
+                                       const valuation_t& max,
+                                       valuation_t normalize) {
 #ifdef VALUATION_T_INT64
   std::uniform_int_distribution<> distr(min, max);
 #else
   std::uniform_real_distribution<> distr(min, max);
 #endif
 
+  std::vector<valuation_t> v(items);
+  for (uint j = 0; j < items; ++j) {
+    v[j] = distr(gen);
+  }
+  return Valuation(v).normalize(normalize);
+}
+
+std::vector<Valuation> Generator::additiveValuations(const std::size_t& agents,
+                                                     const std::size_t& items,
+                                                     const valuation_t& min,
+                                                     const valuation_t& max,
+                                                     valuation_t normalize) {
   std::vector<Valuation> valuations;
-  for (uint i = 0; i < agents; ++i) {
-    std::vector<valuation_t> valuation(items);
-    for (uint j = 0; j < items; ++j) {
-      valuation[j] = distr(gen);
+  for (uint i = 0; i < agents; i++) {
+    valuations.push_back(
+        additiveValuation(items, min, max).normalize(normalize));
+  }
+  return valuations;
+}
+
+Valuation Generator::monotoneValuation(const std::size_t& items,
+                                       const valuation_t& min_delta,
+                                       const valuation_t& max_delta,
+                                       valuation_t normalize) {
+#ifdef VALUATION_T_INT64
+  std::uniform_int_distribution<> distr(min_delta, max_delta);
+#else
+  std::uniform_real_distribution<> distr(min_delta, max_delta);
+#endif
+
+  std::unique_ptr<valuation_t[]> v =
+      std::unique_ptr<valuation_t[]>(new valuation_t[1 << items]);
+
+  for (int mask = 0; mask < (1 << items); mask++) {
+    valuation_t maximal = 0;
+    for (uint j = 0; j < items; j++) {
+      if ((1 << j) & mask) {
+        maximal = std::max(maximal, v[mask & (~(1 << j))]);
+      }
     }
-    valuations.push_back(Valuation(valuation));
-    if (normalize > 0) {
-      valuations.back().normalize(normalize);
-    }
+    v[mask] = maximal + distr(gen);
   }
 
+  return Valuation(items, std::move(v)).normalize(normalize);
+}
+
+std::vector<Valuation> Generator::monotoneValuations(
+    const std::size_t& agents, const std::size_t& items,
+    const valuation_t& min_delta, const valuation_t& max_delta,
+    valuation_t normalize) {
+  std::vector<Valuation> valuations;
+  for (uint i = 0; i < agents; i++) {
+    valuations.push_back(
+        monotoneValuation(items, min_delta, max_delta).normalize(normalize));
+  }
   return valuations;
 }
 

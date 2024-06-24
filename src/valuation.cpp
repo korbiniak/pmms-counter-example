@@ -19,6 +19,9 @@ Valuation::Valuation(const std::vector<valuation_t>& v_) : m(v_.size()) {
   }
 }
 
+Valuation::Valuation(std::size_t m_, std::unique_ptr<valuation_t[]> v_)
+    : m(m_), v(std::move(v_)) {}
+
 Valuation::Valuation(const Valuation& other) : m(other.m) {
   v = std::unique_ptr<valuation_t[]>(new valuation_t[(1 << m)]);
   for (int mask = 0; mask < (1 << m); mask++) {
@@ -48,8 +51,8 @@ bool Valuation::operator==(const Valuation& other) const {
   if (m != other.m) {
     return false;
   }
-  for (std::size_t i = 0; i < m; i++) {
-    if (v[1 << i] != other.v[1 << i]) {
+  for (int i = 0; i < (1 << m); i++) {
+    if (v[i] != other.v[i]) {
       return false;
     }
   }
@@ -66,6 +69,9 @@ std::vector<valuation_t> Valuation::get_v() const {
 }
 
 Valuation& Valuation::normalize(const valuation_t& normal_value) {
+  if (normal_value == 0) {
+    return *this;
+  }
   valuation_t sum = v[(1 << m) - 1];
 
   for (int mask = 0; mask < (1 << m); mask++) {
