@@ -38,10 +38,10 @@ TEST(Pmms, MuValue) {
   Valuation valuation1({1, 2, 3, 4, 5, 6});
   Valuation valuation2({1, 2, 3, 4, 6, 4});
 
-  valuation_t value1 = Pmms::muValue(b1, b2, valuation1);
-  valuation_t value2 = Pmms::muValue(b1, b2, valuation2);
-  EXPECT_EQ(value1, 10);
-  EXPECT_EQ(value2, 10);
+  EXPECT_EQ(Pmms::muValue(b1, b2, valuation1), 10);
+  EXPECT_EQ(Pmms::muValue(b1, b2, valuation2), 10);
+
+  EXPECT_EQ(Pmms::muValue(Bundle::bundle({}), valuation1), 0);
 }
 
 TEST(Pmms, isEnvy) {
@@ -55,6 +55,24 @@ TEST(Pmms, isEnvy) {
   EXPECT_TRUE(Pmms::isEnvious(b1, b2, valuation2));
   EXPECT_FALSE(Pmms::isEnvious(b2, b1, valuation1));
   EXPECT_FALSE(Pmms::isEnvious(b2, b1, valuation2));
+
+  EXPECT_FALSE(
+      Pmms::isEnvious(Bundle::bundle({}), Bundle::bundle({0}), valuation1));
+  EXPECT_FALSE(
+      Pmms::isEnvious(Bundle::bundle({0}), Bundle::bundle({}), valuation1));
+}
+
+TEST(Pmms, isEnvyFreeOneItem) {
+  Valuation valuation1({1});
+  Valuation valuation2({1});
+  Valuation valuation3({1});
+
+  Allocation allocation1(
+      {Bundle::bundle({0}), Bundle::bundle({}), Bundle::bundle({})}, 1);
+
+  allocation1.debugCheckIntegrity();
+  EXPECT_TRUE(
+      Pmms::isEnvyFree(allocation1, {valuation1, valuation3, valuation2}));
 }
 
 TEST(Pmms, isEnvyFree) {
@@ -75,6 +93,33 @@ TEST(Pmms, isEnvyFree) {
       Pmms::isEnvyFree(allocation1, {valuation1, valuation2, valuation3}));
   EXPECT_FALSE(
       Pmms::isEnvyFree(allocation1, {valuation1, valuation3, valuation2}));
+}
+
+TEST(Pmms, getAllAllocationsPrecomputeMuOneItem) {
+  Valuation valuation1({69});
+  Valuation valuation2({93});
+  Valuation valuation3({34});
+
+  std::stringstream ss;
+
+  std::vector<Allocation> allocations =
+      Pmms::getAllAllocationsPrecomputeMu({valuation1, valuation2, valuation3});
+
+  for (uint i = 0; i < allocations.size(); i++) {
+    allocations[i].dump(ss);
+  }
+
+  std::string expected = R"(0: {0, }
+1: {}
+2: {}
+0: {}
+1: {0, }
+2: {}
+0: {}
+1: {}
+2: {0, }
+)";
+  EXPECT_EQ(ss.str(), expected);
 }
 
 TEST(Pmms, getAllAllocations) {

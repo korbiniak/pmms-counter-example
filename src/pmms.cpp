@@ -17,12 +17,11 @@ std::pair<bundle_t, bundle_t> mu(const bundle_t& b1, const bundle_t& b2,
 std::pair<bundle_t, bundle_t> mu(const bundle_t& b,
                                  const Valuation& valuation) {
   bundle_t best_bundle = 0;
-  valuation_t entire_value = valuation[b];
   valuation_t best_value = 0;
 
   BUNDLE_LOOP(bundle, b, {
     valuation_t value = valuation[bundle];
-    if (2 * value > entire_value) {
+    if (value > valuation[b & (~bundle)]) {
       continue;
     }
     if (value > best_value) {

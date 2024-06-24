@@ -1,7 +1,9 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
+#include <functional>
 #include <random>
+
 #include <vector>
 
 #include "src/config.h"
@@ -15,11 +17,26 @@ class Generator {
   int seed; /* Just for debug purposes. */
   Generator(int seed = -1);
 
-  std::vector<Valuation> generateRandomValuations(const std::size_t& agents,
-                                                  const std::size_t& items,
-                                                  const valuation_t& min,
-                                                  const valuation_t& max,
-                                                  valuation_t normalize = 0);
+  Valuation additiveValuation(const std::size_t& items, const valuation_t& min,
+                              const valuation_t& max,
+                              valuation_t normalize = 0);
+
+  std::vector<Valuation> additiveValuations(const std::size_t& agents,
+                                            const std::size_t& items,
+                                            const valuation_t& min,
+                                            const valuation_t& max,
+                                            valuation_t normalize = 0);
+
+  Valuation monotoneValuation(const std::size_t& items,
+                              const valuation_t& min_delta,
+                              const valuation_t& max_delta,
+                              valuation_t normalize = 0);
+
+  std::vector<Valuation> monotoneValuations(const std::size_t& agents,
+                                            const std::size_t& items,
+                                            const valuation_t& min_delta,
+                                            const valuation_t& max_delta,
+                                            valuation_t normalize = 0);
 
   std::vector<Valuation> randomNeighbour(
       const std::vector<Valuation>& valuations, const double& mean,

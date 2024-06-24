@@ -15,6 +15,7 @@ class Valuation {
 
  public:
   Valuation(const std::vector<valuation_t>& v_);
+  Valuation(std::size_t m, std::unique_ptr<valuation_t[]> v);
   Valuation(const Valuation& other);
   Valuation(Valuation&& other) noexcept = default;
   Valuation& operator=(const Valuation& other);
@@ -27,6 +28,7 @@ class Valuation {
 
   inline std::size_t length() const { return m; }
 
+  /* This makes sense only if the valuation is additive. */
   std::vector<valuation_t> get_v() const;
 
   /* TODO: This won't work well if valuation_t is not floating point. */

@@ -66,7 +66,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
 
   Generator gen;
   std::vector<Valuation> valuations =
-      gen.generateRandomValuations(n, m, min_val, max_val, /*normalize=*/100);
+      gen.additiveValuations(n, m, min_val, max_val, /*normalize=*/100);
 
   valuations = SimulatedAnnealing::simulatedAnnealing(
       valuations, gen, max_iterations, alpha, mean, stddev, 100,
