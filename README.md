@@ -7,9 +7,12 @@ Todo:
 - [x] Benchmark.
 - [x] Implement random valuation generation.
 - [x] Add multithreading for allocation searching.
+- [ ] Implement iteration over all allocations for any number of agents.
+- [ ] Check if valuations are MMS-feasible.
+- [ ] Generate submodular valuations.
 - [ ] Implement heuristic algorithms for finding an allocation.
 - [ ] Implement mu function in pseudopolynomial time.
-- [ ] Implement iteration over all allocations for any number of agents.
+- [ ] Subcommands for better pipelining
 
 ## Building and running
 

@@ -56,11 +56,13 @@ Valuation Generator::monotoneValuation(const std::size_t& items,
   std::unique_ptr<valuation_t[]> v =
       std::unique_ptr<valuation_t[]>(new valuation_t[1 << items]);
 
+  v[0] = 0;
+
   for (int mask = 1; mask < (1 << items); mask++) {
     valuation_t maximal = 0;
     for (uint j = 0; j < items; j++) {
-      if ((1 << j) & mask) {
-        maximal = std::max(maximal, v[mask & (~(1 << j))]);
+      if (Bundle::hasItem(mask, j)) {
+        maximal = std::max(maximal, v[Bundle::removeItem(mask, j)]);
       }
     }
     v[mask] = maximal + distr(gen);
