@@ -1,4 +1,6 @@
 #include <alloca.h>
+
+#include <algorithm>
 #include <atomic>
 #include <cstdlib>
 #include <iomanip>
@@ -9,8 +11,25 @@
 #include <vector>
 
 #include "src/cxxopts.h"
+#include "src/efx.h"
 #include "src/generator.h"
 #include "src/pmms.h"
+
+enum EnvyModel { PMMS = 0, EFX };
+
+EnvyModel stringToEnvyModel(const std::string& input) {
+  std::string upper = input;
+  for (auto& c : upper) {
+    c = toupper(c);
+  }
+
+  if (upper == "EFX") {
+    return EnvyModel::EFX;
+  } else if (upper == "PMMS") {
+    return EnvyModel::PMMS;
+  }
+  throw std::runtime_error("Invalid input for enum conversion");
+}
 
 struct Args {
   int n;
@@ -20,6 +39,7 @@ struct Args {
   valuation_t max_val;
   Generator generator;
   bool monotone;
+  EnvyModel envy_model;
 };
 
 std::size_t get_max_number_width(valuation_t max_val) {
@@ -59,9 +79,10 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
   valuation_t max_val = args.max_val;
   Generator& generator = args.generator;
   bool monotone = args.monotone;
+  EnvyModel envy_model = args.envy_model;
+
   const std::size_t number_width = get_max_number_width(max_val);
 
-  // pinToCpu(thread_nr);
   std::cout << "Starting on thread " << thread_nr << std::endl;
 
   for (int cnt = 0;; cnt++) {
@@ -78,8 +99,18 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
       valuations = generator.additiveValuations(n, m, min_val, max_val);
     }
 
-    std::vector<Allocation> allocations =
-        Pmms::getAllAllocationsPrecomputeMu(valuations, current_min);
+    std::vector<Allocation> allocations;
+    switch (envy_model) {
+      case PMMS: {
+        allocations =
+            Pmms::getAllAllocationsPrecomputeMu(valuations, current_min);
+        break;
+      }
+      case EFX: {
+        allocations = Efx::getAllAllocations(valuations, current_min);
+        break;
+      }
+    }
 
     int current = (int)allocations.size();
 
@@ -99,8 +130,20 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
           }
           std::cout << std::endl;
         }
-        std::cout << "Number of allocations: "
-                  << Pmms::getAllAllocationsPrecomputeMu(valuations).size()
+        std::size_t number_of_allocations = 0;
+
+        switch (envy_model) {
+          case PMMS: {
+            number_of_allocations =
+                Pmms::getAllAllocationsPrecomputeMu(valuations).size();
+            break;
+          }
+          case EFX: {
+            number_of_allocations = Efx::getAllAllocations(valuations).size();
+            break;
+          }
+        }
+        std::cout << "Number of allocations: " << number_of_allocations
                   << std::endl;
       }
     }
@@ -121,7 +164,9 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
       cxxopts::value<valuation_t>()->default_value("100"))(
       "p,threads", "Number of threads to run on",
       cxxopts::value<int>()->default_value("1"))("monotone",
-                                                 "Use monotone valuations.");
+                                                 "Use monotone valuations.")(
+      "e,envy", "Envy model.",
+      cxxopts::value<std::string>()->default_value("pmms"));
 
   auto result = options.parse(argc, argv);
 
@@ -135,6 +180,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   int threads_num = result["threads"].as<int>();
   valuation_t min_val = result["min"].as<valuation_t>();
   valuation_t max_val = result["max"].as<valuation_t>();
+  EnvyModel envy_model = stringToEnvyModel(result["envy"].as<std::string>());
   bool monotone = result.count("monotone");
 
   if (n != 3) {
@@ -165,7 +211,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
                  .min_val = min_val,
                  .max_val = max_val,
                  .generator = Generator(),
-                 .monotone = monotone};
+                 .monotone = monotone,
+                 .envy_model = envy_model};
     threads.emplace_back(randomValuationAllocationsCount, args,
                          std::ref(min_allocs), std::ref(log_mtx));
   }

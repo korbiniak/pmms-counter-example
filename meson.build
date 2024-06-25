@@ -54,6 +54,7 @@ gmock_dep = dependency('gmock', required: true)
 lib_src = files(
   srcdir / 'valuation.cpp',
   srcdir / 'pmms.cpp',
+  srcdir / 'efx.cpp',
   srcdir / 'allocation.cpp',
   srcdir / 'generator.cpp',
   srcdir / 'simulated_annealing.cpp',
@@ -67,6 +68,7 @@ test_src = files(
   testdir / 'test_valuation.cpp',
   testdir / 'test_allocation.cpp',
   testdir / 'test_generator.cpp',
+  testdir / 'test_efx.cpp',
 )
 
 benchmark_src = files(
