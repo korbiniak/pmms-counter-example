@@ -33,6 +33,9 @@ class Valuation {
 
   /* TODO: This won't work well if valuation_t is not floating point. */
   Valuation& normalize(const valuation_t& normal_value = 1);
+
+  void monotoneDump(std::ostream& os) const;
+  void additiveDump(std::ostream& os, const std::size_t& number_width) const;
 };
 
 #endif

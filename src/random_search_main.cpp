@@ -92,8 +92,10 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
 
         for (int i = 0; i < n; i++) {
           std::cout << i << ": ";
-          for (auto& v : valuations[i].get_v()) {
-            std::cout << std::setw(number_width + 1) << v;
+          if (monotone) {
+            valuations[i].monotoneDump(std::cout);
+          } else {
+            valuations[i].additiveDump(std::cout, number_width);
           }
           std::cout << std::endl;
         }

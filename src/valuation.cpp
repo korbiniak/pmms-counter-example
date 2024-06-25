@@ -2,7 +2,10 @@
 
 #include <stdint.h>
 #include <cassert>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <string>
 #include <vector>
 
 Valuation::Valuation(const std::vector<valuation_t>& v_) : m(v_.size()) {
@@ -79,4 +82,27 @@ Valuation& Valuation::normalize(const valuation_t& normal_value) {
   }
 
   return *this;
+}
+
+std::string stringmask(int mask, int m) {
+  std::string result;
+
+  for (int i = 0; i < m; i++) {
+    result.push_back('0' + (bool)((1 << i) & mask));
+  }
+
+  return result;
+}
+
+void Valuation::monotoneDump(std::ostream& os) const {
+  for (int mask = 0; mask < (1 << m); mask++) {
+    os << stringmask(mask, m) << ": " << v[mask] << std::endl;
+  }
+}
+
+void Valuation::additiveDump(std::ostream& os,
+                             const std::size_t& number_width) const {
+  for (auto& j : get_v()) {
+    os << std::setw(number_width + 1) << j;
+  }
 }
