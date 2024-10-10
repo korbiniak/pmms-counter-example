@@ -71,15 +71,15 @@ std::vector<Allocation> getAllAllocations(
     const std::vector<Valuation>& valuations, const std::size_t& at_most) {
   std::vector<Allocation> result;
 #ifndef NDEBUG
-  assert(valuations.size() == 3);
   for (uint i = 0; i < valuations.size(); i++) {
     assert(valuations[i].length() == valuations[0].length());
   }
 #endif
 
+  int n = valuations.size();
   int m = valuations[0].length();
   std::size_t found = 0;
-  Allocation::iter3(m, [&](const Allocation& allocation) {
+  Allocation::iter_n(n, m, [&](const Allocation& allocation) {
     if (isEnvyFree(allocation, valuations)) {
       result.push_back(allocation);
       if (at_most > 0 && ++found >= at_most) {
@@ -96,16 +96,16 @@ std::vector<Allocation> getAllAllocationsPrecomputeMu(
     const std::vector<Valuation>& valuations, const std::size_t& at_most) {
   std::vector<Allocation> result;
 #ifndef NDEBUG
-  assert(valuations.size() == 3);
   for (uint i = 0; i < valuations.size(); i++) {
     assert(valuations[i].length() == valuations[0].length());
   }
 #endif
 
   valuation_t** mu = precomputeMu(valuations);
+  int n = valuations.size();
   int m = valuations[0].length();
   std::size_t found = 0;
-  Allocation::iter3(m, [&](const Allocation& allocation) {
+  Allocation::iter_n(n, m, [&](const Allocation& allocation) {
     if (maximalEnvyPrecomputedMu(allocation, valuations, mu) <= 0.) {
       result.push_back(allocation);
       if (at_most > 0 && ++found >= at_most) {
@@ -180,7 +180,10 @@ valuation_t minimalEnvyOverAllAllocations(
     const std::vector<Valuation>& valuations) {
   valuation_t** mu = precomputeMu(valuations);
   valuation_t min_envy = MAX_VALUATION;
-  Allocation::iter3(valuations[0].length(), [&](const Allocation& allocation) {
+  int n = valuations.size();
+  int m = valuations[0].length();
+
+  Allocation::iter_n(n, m, [&](const Allocation& allocation) {
     valuation_t envy = maximalEnvyPrecomputedMu(allocation, valuations, mu);
     if (envy < min_envy) {
       min_envy = envy;
@@ -192,4 +195,5 @@ valuation_t minimalEnvyOverAllAllocations(
 
   return min_envy;
 }
+
 }; /* namespace Pmms */

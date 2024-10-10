@@ -23,6 +23,20 @@ TEST(Allocation, iter3) {
   EXPECT_EQ(ss.str(), expected);
 }
 
+TEST(Allocation, iter_n) {
+  std::stringstream ss;
+
+  std::size_t cnt = 0;
+  const std::string expected =
+      TestCommon::readFile("test/allocation-iter3.test");
+  Allocation::iter_n(3, 3, [&](const Allocation& allocation) {
+    allocation.dump(ss);
+    return (++cnt <= 3);
+  });
+
+  EXPECT_EQ(ss.str(), expected);
+}
+
 TEST(Allocation, valuationMatrix) {
   Allocation allocation(
       {Bundle::bundle({0, 1}), Bundle::bundle({2}), Bundle::bundle({})}, 3);

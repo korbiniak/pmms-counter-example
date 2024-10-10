@@ -7,7 +7,7 @@ Todo:
 - [x] Benchmark.
 - [x] Implement random valuation generation.
 - [x] Add multithreading for allocation searching.
-- [ ] Implement iteration over all allocations for any number of agents.
+- [x] Implement iteration over all allocations for any number of agents.
 - [ ] Check if valuations are MMS-feasible.
 - [ ] Generate submodular valuations.
 - [ ] Implement heuristic algorithms for finding an allocation.
@@ -36,22 +36,47 @@ Binaries are in the build directory.
 - Preprocess valuation for every subset of items.
 - Preprocess the mu function for every agent and subset of items.
 
-Currenct benchmarks for 3 agents and {6..12} items:
+Current benchmarks for 3 agents and {6..12} items:
 
--------------------------------------------------------------------------------------------------
-Benchmark                                                       Time             CPU   Iterations
--------------------------------------------------------------------------------------------------
-BM_PmmsGetAllAllocations/6/min_time:2.000                   0.054 ms        0.054 ms        51389
-BM_PmmsGetAllAllocations/7/min_time:2.000                   0.243 ms        0.243 ms        11557
-BM_PmmsGetAllAllocations/8/min_time:2.000                    1.15 ms         1.15 ms         2450
-BM_PmmsGetAllAllocations/9/min_time:2.000                    5.22 ms         5.22 ms          547
-BM_PmmsGetAllAllocations/10/min_time:2.000                   25.0 ms         25.0 ms          109
-BM_PmmsGetAllAllocations/11/min_time:2.000                    117 ms          117 ms           24
-BM_PmmsGetAllAllocations/12/min_time:2.000                    539 ms          539 ms            5
-BM_PmmsGetAllAllocationsPrecomputeMu/6/min_time:2.000       0.025 ms        0.025 ms       112148
-BM_PmmsGetAllAllocationsPrecomputeMu/7/min_time:2.000       0.081 ms        0.081 ms        34522
-BM_PmmsGetAllAllocationsPrecomputeMu/8/min_time:2.000       0.245 ms        0.245 ms        11456
-BM_PmmsGetAllAllocationsPrecomputeMu/9/min_time:2.000       0.667 ms        0.667 ms         4192
-BM_PmmsGetAllAllocationsPrecomputeMu/10/min_time:2.000       2.18 ms         2.18 ms         1279
-BM_PmmsGetAllAllocationsPrecomputeMu/11/min_time:2.000       7.15 ms         7.15 ms          392
-BM_PmmsGetAllAllocationsPrecomputeMu/12/min_time:2.000       18.7 ms         18.7 ms          149
+        $ ./build/benchmark_main --benchmark_time_unit=ms
+        2024-10-10T11:59:58+02:00
+        Running ./build/benchmark_main
+        Run on (16 X 4900 MHz CPU s)
+        CPU Caches:
+          L1 Data 48 KiB (x8)
+          L1 Instruction 32 KiB (x8)
+          L2 Unified 1280 KiB (x8)
+          L3 Unified 20480 KiB (x1)
+        Load Average: 1.86, 2.18, 4.74
+        ***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
+        -------------------------------------------------------------------------------------------------
+        Benchmark                                                       Time             CPU   Iterations
+        -------------------------------------------------------------------------------------------------
+        BM_PmmsGetAllAllocations/6/min_time:2.000                   0.130 ms        0.130 ms        21344
+        BM_PmmsGetAllAllocations/7/min_time:2.000                   0.651 ms        0.651 ms         4385
+        BM_PmmsGetAllAllocations/8/min_time:2.000                    2.93 ms         2.93 ms          911
+        BM_PmmsGetAllAllocations/9/min_time:2.000                    12.8 ms         12.8 ms          218
+        BM_PmmsGetAllAllocations/10/min_time:2.000                   66.5 ms         66.5 ms           43
+        BM_PmmsGetAllAllocations/11/min_time:2.000                    314 ms          314 ms            9
+        BM_PmmsGetAllAllocations/12/min_time:2.000                   1433 ms         1433 ms            2
+        BM_PmmsGetAllAllocationsPrecomputeMu/6/min_time:2.000       0.023 ms        0.023 ms       123722
+        BM_PmmsGetAllAllocationsPrecomputeMu/7/min_time:2.000       0.076 ms        0.076 ms        36893
+        BM_PmmsGetAllAllocationsPrecomputeMu/8/min_time:2.000       0.216 ms        0.216 ms        12906
+        BM_PmmsGetAllAllocationsPrecomputeMu/9/min_time:2.000       0.557 ms        0.557 ms         5226
+        BM_PmmsGetAllAllocationsPrecomputeMu/10/min_time:2.000       1.80 ms         1.80 ms         1550
+        BM_PmmsGetAllAllocationsPrecomputeMu/11/min_time:2.000       5.80 ms         5.80 ms          484
+        BM_PmmsGetAllAllocationsPrecomputeMu/12/min_time:2.000       14.8 ms         14.8 ms          189
+        BM_iter3/6/min_time:2.000                                   0.001 ms        0.001 ms      2717398
+        BM_iter3/7/min_time:2.000                                   0.003 ms        0.003 ms       932438
+        BM_iter3/8/min_time:2.000                                   0.009 ms        0.009 ms       312691
+        BM_iter3/9/min_time:2.000                                   0.027 ms        0.027 ms       106017
+        BM_iter3/10/min_time:2.000                                  0.079 ms        0.079 ms        35600
+        BM_iter3/11/min_time:2.000                                  0.230 ms        0.230 ms        12198
+        BM_iter3/12/min_time:2.000                                  0.673 ms        0.673 ms         4195
+        BM_iter_n/6/min_time:2.000                                  0.001 ms        0.001 ms      2568918
+        BM_iter_n/7/min_time:2.000                                  0.003 ms        0.003 ms       871657
+        BM_iter_n/8/min_time:2.000                                  0.009 ms        0.009 ms       297980
+        BM_iter_n/9/min_time:2.000                                  0.028 ms        0.028 ms        98870
+        BM_iter_n/10/min_time:2.000                                 0.087 ms        0.087 ms        33443
+        BM_iter_n/11/min_time:2.000                                 0.256 ms        0.256 ms        10708
+        BM_iter_n/12/min_time:2.000                                 0.763 ms        0.763 ms         3658

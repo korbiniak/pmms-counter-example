@@ -34,9 +34,34 @@ static void BM_PmmsGetAllAllocationsPrecomputeMu(benchmark::State& state) {
   }
 }
 
+static void BM_iter_n(benchmark::State& state) {
+  int range = state.range(0);
+
+  for (auto _ : state) {
+    Allocation::iter_n(3, range, [&](const Allocation& allocation) {
+      benchmark::DoNotOptimize(allocation.agents());
+      return true;
+    });
+  }
+}
+
+static void BM_iter3(benchmark::State& state) {
+  int range = state.range(0);
+
+  for (auto _ : state) {
+    Allocation::iter3(range, [&](const Allocation& allocation) {
+      benchmark::DoNotOptimize(allocation.agents());
+      return true;
+    });
+  }
+}
+
 BENCHMARK(BM_PmmsGetAllAllocations)->DenseRange(6, 12)->MinTime(2.0);
 BENCHMARK(BM_PmmsGetAllAllocationsPrecomputeMu)
     ->DenseRange(6, 12)
     ->MinTime(2.0);
+
+BENCHMARK(BM_iter3)->DenseRange(6, 12)->MinTime(2.0);
+BENCHMARK(BM_iter_n)->DenseRange(6, 12)->MinTime(2.0);
 
 BENCHMARK_MAIN();
