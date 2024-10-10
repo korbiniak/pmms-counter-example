@@ -37,16 +37,16 @@ bool isEnvyFree(const Allocation& allocation,
 std::vector<Allocation> getAllAllocations(
     const std::vector<Valuation>& valuations, const std::size_t& at_most) {
 #ifndef NDEBUG
-  assert(valuations.size() == 3);
   for (uint i = 0; i < valuations.size(); i++) {
     assert(valuations[i].length() == valuations[0].length());
   }
 #endif
 
   std::vector<Allocation> result;
+  int n = valuations.size();
   int m = valuations[0].length();
   std::size_t found = 0;
-  Allocation::iter3(m, [&](const Allocation& allocation) {
+  Allocation::iter_n(n, m, [&](const Allocation& allocation) {
     if (isEnvyFree(allocation, valuations)) {
       result.push_back(allocation);
       if (at_most > 0 && ++found >= at_most) {

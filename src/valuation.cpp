@@ -94,9 +94,29 @@ std::string stringmask(int mask, int m) {
   return result;
 }
 
+std::string set_string(int mask, int n) {
+  std::string result = "{";
+  bool first = true;
+
+  for (int i = 0; i < n; i++) {
+    if (((1 << i) & mask)) {
+      if (!first) {
+        result += ", ";
+      }
+      result += std::to_string(i + 1);
+      first = false;
+    }
+  }
+
+  result += "}";
+
+  return result;
+}
+
 void Valuation::monotoneDump(std::ostream& os) const {
   for (int mask = 0; mask < (1 << m); mask++) {
-    os << stringmask(mask, m) << ": " << v[mask] << std::endl;
+    // os << stringmask(mask, m) << ": " << v[mask] << std::endl;
+    os << set_string(mask, m) << ": " << v[mask] << std::endl;
   }
 }
 

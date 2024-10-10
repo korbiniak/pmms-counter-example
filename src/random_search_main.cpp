@@ -75,6 +75,7 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
   int n = args.n;
   int m = args.m;
   int thread_nr = args.thread_nr;
+  int current_min = min_count.load();
   valuation_t min_val = args.min_val;
   valuation_t max_val = args.max_val;
   Generator& generator = args.generator;
@@ -85,12 +86,12 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
 
   std::cout << "Starting on thread " << thread_nr << std::endl;
 
-  for (int cnt = 0;; cnt++) {
+  for (int cnt = 0; current_min; cnt++) {
     if (cnt % 5000000 == 0) {
       std::cout << cnt << " valuations checked on thread " << thread_nr
                 << std::endl;
     }
-    int current_min = min_count.load();
+    current_min = min_count.load();
 
     std::vector<Valuation> valuations;
     if (monotone) {
@@ -130,6 +131,7 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
           }
           std::cout << std::endl;
         }
+
         std::size_t number_of_allocations = 0;
 
         switch (envy_model) {
@@ -145,11 +147,13 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
         }
         std::cout << "Number of allocations: " << number_of_allocations
                   << std::endl;
+
+        if (number_of_allocations == 0) {
+          std::cout << "We did it boys." << std::endl;
+        }
       }
     }
   }
-
-  std::cout << "Finishing on thread " << thread_nr << std::endl;
 }
 
 void parseCommandLineAndRun(int argc, char* argv[]) {
@@ -183,10 +187,6 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   EnvyModel envy_model = stringToEnvyModel(result["envy"].as<std::string>());
   bool monotone = result.count("monotone");
 
-  if (n != 3) {
-    std::cerr << "Only 3 agents are supported now." << std::endl;
-    exit(EXIT_FAILURE);
-  }
   if (m > 20) {
     std::cerr << "WARNING: valuations are computed for every subset of "
                  "items, hence it takes a lot of space to hold a valuation for "
