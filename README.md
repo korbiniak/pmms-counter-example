@@ -16,7 +16,7 @@ Todo:
 
 ## Building and running
 
-You need `meson`, `gtest` and `gmock` installed (`libgtest-dev`
+You need `ninja`, `meson`, `gtest` and `gmock` installed (`libgtest-dev`
 and `libgmock-dev` on Debian).
 
 1. Setup the build environment:

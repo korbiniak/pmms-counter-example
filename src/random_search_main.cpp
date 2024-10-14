@@ -49,21 +49,6 @@ std::size_t get_max_number_width(valuation_t max_val) {
   return strs.str().size();
 }
 
-void pinToCpu(int cpu) {
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(cpu, &cpuset);
-
-  pthread_t thread = pthread_self();
-  if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset) != 0) {
-    std::cerr << "Error setting thread affinity\n";
-  }
-
-  // // Check CPU again after setting affinity
-  cpu = sched_getcpu();
-  std::cout << "Thread pinned to CPU: " << cpu << std::endl;
-}
-
 /* Run an infinite loop.
    * 1. Generate a random valuation
    * 2. Check the number of allocations
