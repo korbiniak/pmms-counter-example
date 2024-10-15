@@ -45,14 +45,26 @@ static void BM_iter_n(benchmark::State& state) {
   }
 }
 
-static void BM_iter3(benchmark::State& state) {
+static void BM_iter_3(benchmark::State& state) {
   int range = state.range(0);
 
   for (auto _ : state) {
-    Allocation::iter3(range, [&](const Allocation& allocation) {
+    Allocation::iter_3(range, [&](const Allocation& allocation) {
       benchmark::DoNotOptimize(allocation.agents());
       return true;
     });
+  }
+}
+
+static void BM_IsMmsFeasible(benchmark::State& state) {
+  int m = state.range(0);
+
+  // Create a valuation with m items, all with value 1
+  std::vector<valuation_t> values(m, 1);
+  Valuation valuation(values);
+
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(Pmms::isMmsFeasible(valuation));
   }
 }
 
@@ -61,7 +73,8 @@ BENCHMARK(BM_PmmsGetAllAllocationsPrecomputeMu)
     ->DenseRange(6, 12)
     ->MinTime(2.0);
 
-BENCHMARK(BM_iter3)->DenseRange(6, 12)->MinTime(2.0);
+BENCHMARK(BM_iter_3)->DenseRange(6, 12)->MinTime(2.0);
 BENCHMARK(BM_iter_n)->DenseRange(6, 12)->MinTime(2.0);
+BENCHMARK(BM_IsMmsFeasible)->DenseRange(6, 12)->MinTime(2.0);
 
 BENCHMARK_MAIN();

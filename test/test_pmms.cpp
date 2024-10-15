@@ -44,6 +44,56 @@ TEST(Pmms, MuValue) {
   EXPECT_EQ(Pmms::muValue(Bundle::bundle({}), valuation1), 0);
 }
 
+TEST(Pmms, IsMmsFeasible) {
+  const size_t m = 4;
+  const size_t array_size = 1 << m;  // 2^m
+
+  std::unique_ptr<valuation_t[]> valuation_array1(new valuation_t[array_size]{
+      0,   // {}
+      1,   // {0}
+      2,   // {1}
+      3,   // {0, 1}
+      4,   // {2}
+      5,   // {0, 2}
+      6,   // {1, 2}
+      7,   // {0, 1, 2}
+      8,   // {3}
+      9,   // {0, 3}
+      10,  // {1, 3}
+      11,  // {0, 1, 3}
+      12,  // {2, 3}
+      13,  // {0, 2, 3}
+      14,  // {1, 2, 3}
+      15   // {0, 1, 2, 3}
+  });
+
+  Valuation valuation1(m, std::move(valuation_array1));
+  bool result1 = Pmms::isMmsFeasible(valuation1);
+  EXPECT_TRUE(result1);
+
+  std::unique_ptr<valuation_t[]> valuation_array2(new valuation_t[array_size]{
+      0,  // {}
+      0,  // {0}
+      0,  // {1}
+      1,  // {0, 1}
+      0,  // {2}
+      0,  // {0, 2}
+      0,  // {1, 2}
+      1,  // {0, 1, 2}
+      0,  // {3}
+      0,  // {0, 3}
+      0,  // {1, 3}
+      1,  // {0, 1, 3}
+      1,  // {2, 3}
+      1,  // {0, 2, 3}
+      1,  // {1, 2, 3}
+      1   // {0, 1, 2, 3}
+  });
+  Valuation valuation2(m, std::move(valuation_array2));
+  bool result2 = Pmms::isMmsFeasible(valuation2);
+  EXPECT_FALSE(result2);
+}
+
 TEST(Pmms, isEnvy) {
   bundle_t b1 = Bundle::bundle({0, 1, 2});
   bundle_t b2 = Bundle::bundle({3, 4, 5});
@@ -186,7 +236,7 @@ TEST(PMMS, maximalEnvy) {
   const std::string expected =
       TestCommon::readFile("test/pmms-maximal-envy.test");
 
-  Allocation::iter3(7, [&](const Allocation& allocation) {
+  Allocation::iter_3(7, [&](const Allocation& allocation) {
     ss << "Allocation:\n";
     allocation.dump(ss);
     ss << Pmms::maximalEnvy(allocation, {valuation1, valuation2, valuation3})
@@ -210,7 +260,7 @@ TEST(PMMS, maximalEnvyPrecomputedMu) {
 
   valuation_t** mu = Pmms::precomputeMu(valuations);
 
-  Allocation::iter3(7, [&](const Allocation& allocation) {
+  Allocation::iter_3(7, [&](const Allocation& allocation) {
     ss << "Allocation:\n";
     allocation.dump(ss);
     ss << Pmms::maximalEnvyPrecomputedMu(allocation, valuations, mu)

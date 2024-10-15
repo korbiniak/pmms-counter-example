@@ -8,7 +8,7 @@ Todo:
 - [x] Implement random valuation generation.
 - [x] Add multithreading for allocation searching.
 - [x] Implement iteration over all allocations for any number of agents.
-- [ ] Check if valuations are MMS-feasible.
+- [x] Check if valuations are MMS-feasible.
 - [ ] Generate submodular valuations.
 - [ ] Implement heuristic algorithms for finding an allocation.
 - [ ] Implement mu function in pseudopolynomial time.
@@ -19,12 +19,12 @@ Todo:
 You need `ninja`, `meson`, `gtest` and `gmock` installed (`libgtest-dev`
 and `libgmock-dev` on Debian).
 
-1. Setup the build environment:
+1.  Setup the build environment:
 
         meson setup build --buildtype=release
         meson setup debugbuild --buildtype=debug  # not required
 
-2. Building and testing:
+2.  Building and testing:
 
         meson compile -C build
         meson test -C build
@@ -66,13 +66,13 @@ Current benchmarks for 3 agents and {6..12} items:
         BM_PmmsGetAllAllocationsPrecomputeMu/10/min_time:2.000       1.80 ms         1.80 ms         1550
         BM_PmmsGetAllAllocationsPrecomputeMu/11/min_time:2.000       5.80 ms         5.80 ms          484
         BM_PmmsGetAllAllocationsPrecomputeMu/12/min_time:2.000       14.8 ms         14.8 ms          189
-        BM_iter3/6/min_time:2.000                                   0.001 ms        0.001 ms      2717398
-        BM_iter3/7/min_time:2.000                                   0.003 ms        0.003 ms       932438
-        BM_iter3/8/min_time:2.000                                   0.009 ms        0.009 ms       312691
-        BM_iter3/9/min_time:2.000                                   0.027 ms        0.027 ms       106017
-        BM_iter3/10/min_time:2.000                                  0.079 ms        0.079 ms        35600
-        BM_iter3/11/min_time:2.000                                  0.230 ms        0.230 ms        12198
-        BM_iter3/12/min_time:2.000                                  0.673 ms        0.673 ms         4195
+        BM_iter_3/6/min_time:2.000                                   0.001 ms        0.001 ms      2717398
+        BM_iter_3/7/min_time:2.000                                   0.003 ms        0.003 ms       932438
+        BM_iter_3/8/min_time:2.000                                   0.009 ms        0.009 ms       312691
+        BM_iter_3/9/min_time:2.000                                   0.027 ms        0.027 ms       106017
+        BM_iter_3/10/min_time:2.000                                  0.079 ms        0.079 ms        35600
+        BM_iter_3/11/min_time:2.000                                  0.230 ms        0.230 ms        12198
+        BM_iter_3/12/min_time:2.000                                  0.673 ms        0.673 ms         4195
         BM_iter_n/6/min_time:2.000                                  0.001 ms        0.001 ms      2568918
         BM_iter_n/7/min_time:2.000                                  0.003 ms        0.003 ms       871657
         BM_iter_n/8/min_time:2.000                                  0.009 ms        0.009 ms       297980

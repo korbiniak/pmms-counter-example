@@ -29,7 +29,6 @@ EnvyModel stringToEnvyModel(const std::string& input) {
   }
   throw std::runtime_error("Invalid input for enum conversion");
 }
-
 struct Args {
   int n;
   int m;
@@ -39,6 +38,7 @@ struct Args {
   Generator generator;
   bool monotone;
   EnvyModel envy_model;
+  int mmsFeasibleCnt;
 };
 
 std::size_t get_max_number_width(valuation_t max_val) {
@@ -76,10 +76,10 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
                 << std::endl;
     }
     current_min = min_count.load();
-
     std::vector<Valuation> valuations;
     if (monotone) {
-      valuations = generator.monotoneValuations(n, m, min_val, max_val);
+      valuations = generator.monotoneValuations(n, m, min_val, max_val, 0,
+                                                args.mmsFeasibleCnt);
     } else {
       valuations = generator.additiveValuations(n, m, min_val, max_val);
     }
@@ -156,7 +156,10 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
       "e,envy", "Envy model.",
       cxxopts::value<std::string>()->default_value("pmms"))(
       "a,max_alloc", "Maximum number of allocations to search for",
-      cxxopts::value<int>()->default_value("2147483647"));
+      cxxopts::value<int>()->default_value("2147483647"))
+
+      ("mms-feasible-cnt", "Number of MMS feasible agents to generate",
+       cxxopts::value<int>()->default_value("0"));
 
   auto result = options.parse(argc, argv);
 
@@ -173,6 +176,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   EnvyModel envy_model = stringToEnvyModel(result["envy"].as<std::string>());
   bool monotone = result.count("monotone");
   int max_alloc = result["max_alloc"].as<int>();
+
+  int mmsFeasibleCnt = result["mms-feasible-cnt"].as<int>();
 
   if (m > 20) {
     std::cerr << "WARNING: valuations are computed for every subset of "
@@ -200,7 +205,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
                  .max_val = max_val,
                  .generator = Generator(),
                  .monotone = monotone,
-                 .envy_model = envy_model};
+                 .envy_model = envy_model,
+                 .mmsFeasibleCnt = mmsFeasibleCnt};
     threads.emplace_back(randomValuationAllocationsCount, args,
                          std::ref(min_allocs), std::ref(log_mtx));
   }

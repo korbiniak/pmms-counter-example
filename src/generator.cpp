@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <random>
 
+#include "src/bundle.h"
 #include "src/config.h"
+#include "src/pmms.h"
 
 Generator::Generator(int seed_) {
   if (seed_ == -1) {
@@ -74,11 +76,18 @@ Valuation Generator::monotoneValuation(const std::size_t& items,
 std::vector<Valuation> Generator::monotoneValuations(
     const std::size_t& agents, const std::size_t& items,
     const valuation_t& min_delta, const valuation_t& max_delta,
-    valuation_t normalize) {
+    valuation_t normalize, uint mmsFeasibleCnt) {
   std::vector<Valuation> valuations;
   for (uint i = 0; i < agents; i++) {
-    valuations.push_back(
-        monotoneValuation(items, min_delta, max_delta).normalize(normalize));
+    Valuation valuation =
+        monotoneValuation(items, min_delta, max_delta).normalize(normalize);
+    if (i < mmsFeasibleCnt) {
+      while (!Pmms::isMmsFeasible(valuation)) {
+        valuation =
+            monotoneValuation(items, min_delta, max_delta).normalize(normalize);
+      }
+    }
+    valuations.push_back(valuation);
   }
   return valuations;
 }

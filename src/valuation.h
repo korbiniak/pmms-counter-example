@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "src/bundle.h"
 #include "src/config.h"
 
 /* I assume that a valuation cannot be empty, i.e. number of items is greater than 0. */

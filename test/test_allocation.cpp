@@ -1,7 +1,6 @@
 #include "gmock/gmock.h"
 #include "src/allocation.h"
 
-#include <fstream>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -9,13 +8,15 @@
 
 #include "test/test_common.h"
 
-TEST(Allocation, iter3) {
+#include "src/bundle.h"
+
+TEST(Allocation, iter_3) {
   std::stringstream ss;
 
   std::size_t cnt = 0;
   const std::string expected =
-      TestCommon::readFile("test/allocation-iter3.test");
-  Allocation::iter3(3, [&](const Allocation& allocation) {
+      TestCommon::readFile("test/allocation-iter-3.test");
+  Allocation::iter_3(3, [&](const Allocation& allocation) {
     allocation.dump(ss);
     return (++cnt <= 3);
   });
@@ -28,7 +29,7 @@ TEST(Allocation, iter_n) {
 
   std::size_t cnt = 0;
   const std::string expected =
-      TestCommon::readFile("test/allocation-iter3.test");
+      TestCommon::readFile("test/allocation-iter-3.test");
   Allocation::iter_n(3, 3, [&](const Allocation& allocation) {
     allocation.dump(ss);
     return (++cnt <= 3);

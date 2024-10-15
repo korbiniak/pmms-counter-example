@@ -32,8 +32,8 @@ class Allocation {
 
   /* Iterate over all allocations for 3 agents and m items. This
      terminates early if [func] returns [false] at any point. */
-  static void iter3(const size_t& m,
-                    const std::function<bool(const Allocation&)>& func);
+  static void iter_3(const size_t& m,
+                     const std::function<bool(const Allocation&)>& func);
 
   /* Iterate over all allocations for n agents and m items. This
      terminates early if [func] returns [false] at any point. */

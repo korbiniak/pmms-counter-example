@@ -39,10 +39,13 @@ class Bundle {
   }
 };
 
+/* WARNING: Note that [continue] might be dangerous. */
 #define BUNDLE_LOOP(bundle, available_items, code)  \
   for (bundle_t bundle = (available_items);;        \
        bundle = (bundle - 1) & (available_items)) { \
-    { code }                                        \
+    {                                               \
+      code                                          \
+    }                                               \
     if (bundle == 0) {                              \
       break;                                        \
     }                                               \

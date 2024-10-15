@@ -24,8 +24,8 @@ const bundle_t& Allocation::operator[](const std::size_t& idx) const {
   return bundles[idx];
 }
 
-void Allocation::iter3(const size_t& m,
-                       const std::function<bool(const Allocation&)>& func) {
+void Allocation::iter_3(const size_t& m,
+                        const std::function<bool(const Allocation&)>& func) {
   bundle_t all_items = (1 << m) - 1;
   Allocation allocation({}, m);
 
@@ -76,7 +76,7 @@ void Allocation::iter_n(const int& n, const size_t& m,
   }
 
   if (n == 3) {
-    iter3(m, func);
+    iter_3(m, func);
     return;
   }
 

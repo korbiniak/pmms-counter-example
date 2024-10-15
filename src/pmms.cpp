@@ -1,10 +1,11 @@
 #include "src/pmms.h"
 
-#include <cassert>
-#include <iostream>
+#include <limits>
 
 #include "allocation.h"
+#include "bundle.h"
 #include "src/config.h"
+#include "valuation.h"
 
 namespace Pmms {
 /* TODO: This could be done much faster if we used ints for valuation +
@@ -14,6 +15,7 @@ std::pair<bundle_t, bundle_t> mu(const bundle_t& b1, const bundle_t& b2,
   return mu(b1 | b2, valuation);
 }
 
+/* TODO: Consider checking if valuation[b] is big and if not go for DP instead of brute force. */
 std::pair<bundle_t, bundle_t> mu(const bundle_t& b,
                                  const Valuation& valuation) {
   bundle_t best_bundle = 0;
@@ -21,16 +23,29 @@ std::pair<bundle_t, bundle_t> mu(const bundle_t& b,
 
   BUNDLE_LOOP(bundle, b, {
     valuation_t value = valuation[bundle];
-    if (value > valuation[b & (~bundle)]) {
-      continue;
-    }
-    if (value > best_value) {
+    if (value <= valuation[b & (~bundle)] && value > best_value) {
       best_value = value;
       best_bundle = bundle;
     }
   });
 
   return {best_bundle, b & (~best_bundle)};
+}
+
+std::pair<bundle_t, bundle_t> eta(const bundle_t& b,
+                                  const Valuation& valuation) {
+  bundle_t min_bundle = 0;
+  valuation_t min_value = std::numeric_limits<int>::max();
+
+  BUNDLE_LOOP(bundle, b, {
+    valuation_t value = valuation[bundle];
+    if (value >= valuation[b & (~bundle)] && value < min_value) {
+      min_value = value;
+      min_bundle = bundle;
+    }
+  });
+
+  return {min_bundle, b & (~min_bundle)};
 }
 
 valuation_t muValue(const bundle_t& b1, const bundle_t& b2,
@@ -62,6 +77,38 @@ bool isEnvyFree(const Allocation& allocation,
         return false;
       }
     }
+  }
+
+  return true;
+}
+
+bool isMmsFeasible(const Valuation& valuation) {
+  size_t m = valuation.length();
+
+  /* We want to find the partition with minimal maximum value, if it's smaller than a partition with
+     maximal minimum value, then the valution is not MMS-feasible. */
+  for (int mask = 1; mask < (1 << m); mask++) {
+    valuation_t min_max_value = MAX_VALUATION;
+    /* This corresponds to the mu value. */
+    valuation_t max_min_value = MIN_VALUATION;
+
+    BUNDLE_LOOP(bundle, mask, {
+      valuation_t value = valuation[bundle];
+
+      /* value is the min, maybe it's larger than the global? */
+      if (value <= valuation[mask & (~bundle)] && value > max_min_value) {
+        max_min_value = value;
+      }
+
+      /* value is the max, maybe it's smaller than the global?*/
+      if (value >= valuation[mask & (~bundle)] && value < min_max_value) {
+        min_max_value = value;
+      }
+
+      if (max_min_value > min_max_value) {
+        return false;
+      }
+    });
   }
 
   return true;

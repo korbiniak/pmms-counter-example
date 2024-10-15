@@ -36,7 +36,8 @@ class Generator {
                                             const std::size_t& items,
                                             const valuation_t& min_delta,
                                             const valuation_t& max_delta,
-                                            valuation_t normalize = 0);
+                                            valuation_t normalize = 0,
+                                            uint mmsFeasibleCnt = 0);
 
   std::vector<Valuation> randomNeighbour(
       const std::vector<Valuation>& valuations, const double& mean,
