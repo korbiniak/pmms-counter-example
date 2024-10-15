@@ -79,14 +79,10 @@ std::vector<Valuation> Generator::monotoneValuations(
     valuation_t normalize, uint mmsFeasibleCnt) {
   std::vector<Valuation> valuations;
   for (uint i = 0; i < agents; i++) {
-    Valuation valuation =
-        monotoneValuation(items, min_delta, max_delta).normalize(normalize);
-    if (i < mmsFeasibleCnt) {
-      while (!Pmms::isMmsFeasible(valuation)) {
-        valuation =
-            monotoneValuation(items, min_delta, max_delta).normalize(normalize);
-      }
-    }
+    Valuation valuation = i < mmsFeasibleCnt
+                              ? additiveValuation(items, min_delta, max_delta)
+                              : monotoneValuation(items, min_delta, max_delta)
+                                    .normalize(normalize);
     valuations.push_back(valuation);
   }
   return valuations;

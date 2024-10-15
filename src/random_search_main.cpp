@@ -9,6 +9,7 @@
 #include <thread>
 #include <vector>
 
+#include "allocation.h"
 #include "src/cxxopts.h"
 #include "src/efx.h"
 #include "src/generator.h"
@@ -116,23 +117,13 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
           std::cout << std::endl;
         }
 
-        std::size_t number_of_allocations = 0;
+        std::cout << "Number of allocations: " << current << std::endl;
 
-        switch (envy_model) {
-          case PMMS: {
-            number_of_allocations =
-                Pmms::getAllAllocationsPrecomputeMu(valuations).size();
-            break;
-          }
-          case EFX: {
-            number_of_allocations = Efx::getAllAllocations(valuations).size();
-            break;
-          }
+        if (current == 1) {
+          std::cout << "The only allocation:\n";
+          allocations[0].dump(std::cout);
         }
-        std::cout << "Number of allocations: " << number_of_allocations
-                  << std::endl;
-
-        if (number_of_allocations == 0) {
+        if (current == 0) {
           std::cout << "We did it boys." << std::endl;
         }
       }
