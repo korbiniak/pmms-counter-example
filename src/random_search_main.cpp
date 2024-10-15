@@ -1,6 +1,5 @@
 #include <alloca.h>
 
-#include <algorithm>
 #include <atomic>
 #include <cstdlib>
 #include <iomanip>
@@ -155,7 +154,9 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
       cxxopts::value<int>()->default_value("1"))("monotone",
                                                  "Use monotone valuations.")(
       "e,envy", "Envy model.",
-      cxxopts::value<std::string>()->default_value("pmms"));
+      cxxopts::value<std::string>()->default_value("pmms"))(
+      "a,max_alloc", "Maximum number of allocations to search for",
+      cxxopts::value<int>()->default_value("2147483647"));
 
   auto result = options.parse(argc, argv);
 
@@ -171,6 +172,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   valuation_t max_val = result["max"].as<valuation_t>();
   EnvyModel envy_model = stringToEnvyModel(result["envy"].as<std::string>());
   bool monotone = result.count("monotone");
+  int max_alloc = result["max_alloc"].as<int>();
 
   if (m > 20) {
     std::cerr << "WARNING: valuations are computed for every subset of "
@@ -181,8 +183,9 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
 
   std::cout << "Searching random valuations for n=" << n << " m=" << m
             << " on p=" << threads_num << " threads." << std::endl;
+  std::cout << "Maximum allocations to search for: " << max_alloc << std::endl;
 
-  std::atomic<int> min_allocs(std::numeric_limits<int>::max());
+  std::atomic<int> min_allocs(max_alloc);
   std::mutex log_mtx;  // Mutex for synchronizing additional actions
 
   std::vector<std::thread> threads;
