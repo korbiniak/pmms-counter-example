@@ -30,6 +30,7 @@ EnvyModel stringToEnvyModel(const std::string& input) {
   }
   throw std::runtime_error("Invalid input for enum conversion");
 }
+
 struct Args {
   int n;
   int m;
@@ -43,7 +44,6 @@ struct Args {
 };
 
 std::size_t get_max_number_width(valuation_t max_val) {
-  std::cout << std::fixed << std::setprecision(3);
   std::ostringstream strs;
   strs << std::fixed << std::setprecision(3) << max_val;
   return strs.str().size();
@@ -56,7 +56,7 @@ std::size_t get_max_number_width(valuation_t max_val) {
    * number of allocations.
    */
 void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
-                                     std::mutex& log_mtx) {
+                                     std::mutex& cout_mutex) {
   int n = args.n;
   int m = args.m;
   int thread_nr = args.thread_nr;
@@ -69,10 +69,14 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
 
   const std::size_t number_width = get_max_number_width(max_val);
 
-  std::cout << "Starting on thread " << thread_nr << std::endl;
+  {
+    std::lock_guard<std::mutex> guard(cout_mutex);
+    std::cout << "Starting on thread " << thread_nr << std::endl;
+  }
 
   for (int cnt = 0; current_min; cnt++) {
     if (cnt % 5000000 == 0) {
+      std::lock_guard<std::mutex> guard(cout_mutex);
       std::cout << cnt << " valuations checked on thread " << thread_nr
                 << std::endl;
     }
@@ -103,12 +107,12 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
     while (current < current_min) {
       if (min_count.compare_exchange_weak(current_min, current)) {
         // current_min is automatically updated if compare_exchange_weak fails
-        std::lock_guard<std::mutex> guard(log_mtx);
+        std::lock_guard<std::mutex> guard(cout_mutex);
 
         std::cout << "Found new minimum on thread " << thread_nr << std::endl;
 
         for (int i = 0; i < n; i++) {
-          std::cout << i << ": ";
+          std::cout << "Valuation " << i << ":" << std::endl;
           if (monotone) {
             valuations[i].monotoneDump(std::cout);
           } else {
@@ -182,7 +186,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   std::cout << "Maximum allocations to search for: " << max_alloc << std::endl;
 
   std::atomic<int> min_allocs(max_alloc);
-  std::mutex log_mtx;  // Mutex for synchronizing additional actions
+  std::mutex cout_mutex;  // Mutex for synchronizing cout access
 
   std::vector<std::thread> threads;
 
@@ -199,7 +203,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
                  .envy_model = envy_model,
                  .mmsFeasibleCnt = mmsFeasibleCnt};
     threads.emplace_back(randomValuationAllocationsCount, args,
-                         std::ref(min_allocs), std::ref(log_mtx));
+                         std::ref(min_allocs), std::ref(cout_mutex));
   }
   for (auto& thread : threads) {
     thread.join();
@@ -208,6 +212,7 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
   std::cout << "Time taken: " << duration.count() << " milliseconds"
             << std::endl;
 }
