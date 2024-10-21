@@ -17,7 +17,6 @@ def process_input(input_str: str) -> Dict[str, Dict[str, int]]:
         result[f"Valuation {i}"] = {}
 
         for line in lines:
-            # print(line)
             key, value = line.split(': ')
             key_set: Set[int] = eval(key)  # Convert string representation of set to actual set
             value = int(value)
@@ -30,7 +29,7 @@ def process_input(input_str: str) -> Dict[str, Dict[str, int]]:
 def create_jittered_layout(filtered_data: Dict[str, Dict[str, int]]) -> Dict[int, Tuple[float, float]]:
     max_nodes = max(max(max(eval(key)) for key in data.keys()) for data in filtered_data.values())
     base_pos = nx.circular_layout(range(1, max_nodes + 1))
-    return {node: (x + np.random.normal(0, 0.05), y + np.random.normal(0, 0.05))
+    return {node: (x + np.random.normal(0, 0.2), y + np.random.normal(0, 0.2))
             for node, (x, y) in base_pos.items()}
 
 def create_graph(data: Dict[str, int]) -> nx.Graph:
@@ -42,7 +41,7 @@ def create_graph(data: Dict[str, int]) -> nx.Graph:
         key_set: Set[int] = eval(key)
         match tuple(key_set):
             case (node,):
-                G.nodes[node]['value'] = value
+                G.nodes[node]['weight'] = value
             case (u, v):
                 G.add_edge(u, v, weight=value)
             case set:
@@ -61,6 +60,7 @@ def get_pmms_value(G: nx.Graph, a, b, c, d):
     ]
     max_value = 0
 
+    # p stands for 'prime'.
     for (u, v), (up, vp) in pairs:
         max_value = max(max_value, min(G.edges[u, v]["weight"], G.edges[up, vp]["weight"]))
 
@@ -68,6 +68,23 @@ def get_pmms_value(G: nx.Graph, a, b, c, d):
 
 def get_mouseover_highlight_mapping(G: nx.Graph) -> Dict[Union[int, Tuple[int, int]], List[Union[int, Tuple[int, int]]]]:
     mapping = {}
+
+    for u, w in G.nodes.data("weight"):
+        mapping[u] = [u]
+        for up in G.nodes:
+            if up != u:
+                mapping[u].append(up)
+
+        for up, vp, wp in G.edges.data("weight"):
+            if up == u or vp == u:
+                continue
+
+            wpp = min(G.edges[u, up]["weight"], G.nodes[vp]["weight"])
+            wppp = min(G.edges[u, vp]["weight"], G.nodes[up]["weight"])
+
+            if max(wpp, wppp) <= w:
+                mapping[u].append((up, vp))
+
     for u, v, w in G.edges.data("weight"):
         mapping[(u, v)] = [(u, v), u, v]
         for up, vp in G.edges:
@@ -75,19 +92,22 @@ def get_mouseover_highlight_mapping(G: nx.Graph) -> Dict[Union[int, Tuple[int, i
                 continue
 
             pmms = get_pmms_value(G, u, v, up, vp)
-            print(u, v, up, vp, pmms)
             if w >= pmms:
                 mapping[(u, v)] += [(up, vp), up, vp]
 
     return mapping
 
+pmms_mappings = []
+
 def draw_interactive_graph(G: nx.Graph, pos: Dict[int, Tuple[float, float]], ax: Axes, valuation: str):
+    global pmms_mappings
+
     edge_weights = get_edge_weights(G)
     node_sizes = {node: 5 for node in G.nodes()}
-    node_labels = {node: f"{node}\n({G.nodes[node].get('value', '')})" for node in G.nodes()}
+    node_labels = {node: f"{node} ({G.nodes[node].get('weight', '')})" for node in G.nodes()}
     edge_labels = nx.get_edge_attributes(G, 'weight')
     mouseover_highlight_mapping = get_mouseover_highlight_mapping(G)
-    print(mouseover_highlight_mapping)
+    pmms_mappings.append(mouseover_highlight_mapping)
 
     g = InteractiveGraph(
         G,
@@ -109,6 +129,7 @@ def draw_interactive_graph(G: nx.Graph, pos: Dict[int, Tuple[float, float]], ax:
 
     return g, ax
 
+
 def draw_graphs(filtered_data: Dict[str, Dict[str, int]]) -> None:
     num_valuations = len(filtered_data)
     fig, axs = plt.subplots(1, num_valuations, figsize=(8*num_valuations, 6), squeeze=False)
@@ -121,9 +142,9 @@ def draw_graphs(filtered_data: Dict[str, Dict[str, int]]) -> None:
     for i, (valuation, data) in enumerate(filtered_data.items()):
         G = create_graph(data)
         pos = {node: jittered_pos[node] for node in G.nodes()}
+
         graph, ax = draw_interactive_graph(G, pos, axs[i], valuation)
         graphs.append((G, graph, ax))
-
 
     plt.tight_layout()
     plt.show()
@@ -139,13 +160,6 @@ def main() -> None:
 
     filtered_data: Dict[str, Dict[str, int]] = process_input(input_str)
 
-    for valuation, data in filtered_data.items():
-        print(f"{valuation}:")
-        for key, value in data.items():
-            print(f"{key}: {value}")
-        print()  # Add a blank line between valuations
-
-        print(data.keys())
     draw_graphs(filtered_data)
 
 if __name__ == "__main__":

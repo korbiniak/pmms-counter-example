@@ -123,10 +123,14 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
 
         std::cout << "Number of allocations: " << current << std::endl;
 
-        if (current == 1) {
-          std::cout << "The only allocation:\n";
-          allocations[0].dump(std::cout);
+        if (current <= 3) {
+          std::cout << "All allocations:" << std::endl;
+          for (const Allocation& allocation : allocations) {
+            allocation.dump(std::cout);
+            std::cout << std::endl;
+          }
         }
+
         if (current == 0) {
           std::cout << "We did it boys." << std::endl;
         }
