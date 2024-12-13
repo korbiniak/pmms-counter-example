@@ -14,6 +14,7 @@
 #include "src/efx.h"
 #include "src/generator.h"
 #include "src/pmms.h"
+#include "src/two_alloc.h"
 
 enum EnvyModel { PMMS = 0, EFX };
 
@@ -41,6 +42,7 @@ struct Args {
   bool monotone;
   EnvyModel envy_model;
   int mmsFeasibleCnt;
+  bool two_val;
 };
 
 std::size_t get_max_number_width(valuation_t max_val) {
@@ -66,6 +68,7 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
   Generator& generator = args.generator;
   bool monotone = args.monotone;
   EnvyModel envy_model = args.envy_model;
+  bool two_val = args.two_val;
 
   const std::size_t number_width = get_max_number_width(max_val);
 
@@ -81,28 +84,40 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
                 << std::endl;
     }
     current_min = min_count.load();
+
+    int current;
     std::vector<Valuation> valuations;
-    if (monotone) {
-      valuations = generator.monotoneValuations(n, m, min_val, max_val, 0,
-                                                args.mmsFeasibleCnt);
-    } else {
-      valuations = generator.additiveValuations(n, m, min_val, max_val);
-    }
-
+    std::vector<TwoVal> two_vals;
     std::vector<Allocation> allocations;
-    switch (envy_model) {
-      case PMMS: {
-        allocations =
-            Pmms::getAllAllocationsPrecomputeMu(valuations, current_min);
-        break;
-      }
-      case EFX: {
-        allocations = Efx::getAllAllocations(valuations, current_min);
-        break;
-      }
-    }
+    std::vector<TwoAlloc> two_allocs;
 
-    int current = (int)allocations.size();
+    if (two_val) {
+      two_vals = generator.twoValuations(n, min_val, max_val, monotone);
+      two_allocs = Pmms::getAllTwoAllocs(two_vals, current_min);
+
+      current = (int)two_allocs.size();
+    } else {
+      if (monotone) {
+        valuations = generator.monotoneValuations(n, m, min_val, max_val, 0,
+                                                  args.mmsFeasibleCnt);
+      } else {
+        valuations = generator.additiveValuations(n, m, min_val, max_val);
+      }
+
+      switch (envy_model) {
+        case PMMS: {
+          allocations =
+              Pmms::getAllAllocationsPrecomputeMu(valuations, current_min);
+          break;
+        }
+        case EFX: {
+          allocations = Efx::getAllAllocations(valuations, current_min);
+          break;
+        }
+      }
+
+      current = (int)allocations.size();
+    }
 
     while (current < current_min) {
       if (min_count.compare_exchange_weak(current_min, current)) {
@@ -113,23 +128,27 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
 
         for (int i = 0; i < n; i++) {
           std::cout << "Valuation " << i << ":" << std::endl;
-          if (monotone) {
-            valuations[i].monotoneDump(std::cout);
+          if (two_val) {
+            two_vals[i].monotoneDump(std::cout, number_width);
           } else {
-            valuations[i].additiveDump(std::cout, number_width);
+            if (monotone) {
+              valuations[i].monotoneDump(std::cout);
+            } else {
+              valuations[i].additiveDump(std::cout, number_width);
+            }
           }
           std::cout << std::endl;
         }
 
         std::cout << "Number of allocations: " << current << std::endl;
 
-        if (current <= 3) {
-          std::cout << "All allocations:" << std::endl;
-          for (const Allocation& allocation : allocations) {
-            allocation.dump(std::cout);
-            std::cout << std::endl;
-          }
-        }
+        // if (current <= 3) {
+        //   std::cout << "All allocations:" << std::endl;
+        //   for (const Allocation& allocation : allocations) {
+        //     allocation.dump(std::cout);
+        //     std::cout << std::endl;
+        //   }
+        // }
 
         if (current == 0) {
           std::cout << "We did it boys." << std::endl;
@@ -155,10 +174,10 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
       "e,envy", "Envy model.",
       cxxopts::value<std::string>()->default_value("pmms"))(
       "a,max_alloc", "Maximum number of allocations to search for",
-      cxxopts::value<int>()->default_value("2147483647"))
-
-      ("mms-feasible-cnt", "Number of MMS feasible agents to generate",
-       cxxopts::value<int>()->default_value("0"));
+      cxxopts::value<int>()->default_value("2147483647"))(
+      "mms-feasible-cnt", "Number of MMS feasible agents to generate",
+      cxxopts::value<int>()->default_value("0"))(
+      "two_val", "Use two-valuations instead of regular valuations");
 
   auto result = options.parse(argc, argv);
 
@@ -175,8 +194,9 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   EnvyModel envy_model = stringToEnvyModel(result["envy"].as<std::string>());
   bool monotone = result.count("monotone");
   int max_alloc = result["max_alloc"].as<int>();
+  bool two_val = result.count("two_val");
 
-  int mmsFeasibleCnt = result["mms-feasible-cnt"].as<int>();
+  int mms_feasible_cnt = result["mms-feasible-cnt"].as<int>();
 
   if (m > 20) {
     std::cerr << "WARNING: valuations are computed for every subset of "
@@ -197,15 +217,18 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
 
   for (int i = 0; i < threads_num; ++i) {
-    Args args = {.n = n,
-                 .m = m,
-                 .thread_nr = i,
-                 .min_val = min_val,
-                 .max_val = max_val,
-                 .generator = Generator(),
-                 .monotone = monotone,
-                 .envy_model = envy_model,
-                 .mmsFeasibleCnt = mmsFeasibleCnt};
+    Args args = {
+        .n = n,
+        .m = m,
+        .thread_nr = i,
+        .min_val = min_val,
+        .max_val = max_val,
+        .generator = Generator(),
+        .monotone = monotone,
+        .envy_model = envy_model,
+        .mmsFeasibleCnt = mms_feasible_cnt,
+        .two_val = two_val,
+    };
     threads.emplace_back(randomValuationAllocationsCount, args,
                          std::ref(min_allocs), std::ref(cout_mutex));
   }

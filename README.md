@@ -9,6 +9,7 @@ Todo:
 - [x] Add multithreading for allocation searching.
 - [x] Implement iteration over all allocations for any number of agents.
 - [x] Check if valuations are MMS-feasible.
+- [ ] Cut the recursion if some prefix of the bundles are sufficient to tell if there is envy or not.
 - [ ] Generate submodular valuations.
 - [ ] Implement heuristic algorithms for finding an allocation.
 - [ ] Implement mu function in pseudopolynomial time.

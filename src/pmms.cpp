@@ -82,6 +82,33 @@ bool isEnvyFree(const Allocation& allocation,
   return true;
 }
 
+valuation_t muValue(const std::pair<int, int>& b1,
+                    const std::pair<int, int>& b2, const TwoVal& two_val) {
+  valuation_t a = b1.first, b = b1.second, c = b2.first, d = b2.second;
+  return std::max({std::min(two_val[{a, b}], two_val[{c, d}]),
+                   std::min(two_val[{a, c}], two_val[{b, d}]),
+                   std::min(two_val[{a, d}], two_val[{b, c}])});
+}
+
+bool isEnvyFree(const TwoAlloc& two_alloc,
+                const std::vector<TwoVal>& two_vals) {
+  int n = two_alloc.agents();
+  for (int i = 0; i < n; i++) {
+    valuation_t value = two_vals[i][two_alloc[i]];
+    for (int j = 0; j < n; j++) {
+      if (i == j) {
+        continue;
+      }
+
+      if (value < muValue(two_alloc[i], two_alloc[j], two_vals[i])) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool isMmsFeasible(const Valuation& valuation) {
   size_t m = valuation.length();
 
@@ -163,6 +190,24 @@ std::vector<Allocation> getAllAllocationsPrecomputeMu(
   });
 
   free2DArray(mu);
+  return result;
+}
+
+std::vector<TwoAlloc> getAllTwoAllocs(const std::vector<TwoVal>& two_vals,
+                                      const std::size_t& at_most) {
+  std::vector<TwoAlloc> result;
+  std::size_t found = 0;
+
+  TwoAlloc::iter_n(two_vals.size(), [&](const TwoAlloc& two_alloc) {
+    if (isEnvyFree(two_alloc, two_vals)) {
+      result.push_back(two_alloc);
+      if (at_most > 0 && ++found >= at_most) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return result;
 }
 

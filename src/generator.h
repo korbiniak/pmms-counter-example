@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "src/config.h"
+#include "src/two_val.h"
 #include "src/valuation.h"
 
 class Generator {
@@ -38,6 +39,13 @@ class Generator {
                                             const valuation_t& max_delta,
                                             valuation_t normalize = 0,
                                             uint mmsFeasibleCnt = 0);
+
+  TwoVal twoValuation(const std::size_t& agents, const valuation_t& min,
+                      const valuation_t& max, bool monotone);
+
+  std::vector<TwoVal> twoValuations(const std::size_t& agents,
+                                    const valuation_t& min,
+                                    const valuation_t& max, bool monotone);
 
   std::vector<Valuation> randomNeighbour(
       const std::vector<Valuation>& valuations, const double& mean,

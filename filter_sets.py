@@ -120,9 +120,9 @@ def draw_interactive_graph(G: nx.Graph, pos: Dict[int, Tuple[float, float]], ax:
         edge_width=2,
         edge_cmap='viridis',
         # WARNING: I changed the library to support this!
-        mouseover_highlight_mapping=mouseover_highlight_mapping,
         ax=ax
     )
+    g.mouseover_highlight_mapping = mouseover_highlight_mapping
 
     ax.set_title(f"Graph for {valuation}")
     ax.axis('off')

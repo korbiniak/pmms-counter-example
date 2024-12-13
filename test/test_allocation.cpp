@@ -1,5 +1,6 @@
 #include "gmock/gmock.h"
 #include "src/allocation.h"
+#include "src/two_alloc.h"
 
 #include <vector>
 
@@ -52,4 +53,18 @@ TEST(Allocation, valuationMatrix) {
               ::testing::ElementsAre(std::vector<valuation_t>({3, 3, 0}),
                                      std::vector<valuation_t>({9, 6, 0}),
                                      std::vector<valuation_t>({15, 9, 0})));
+}
+
+TEST(TwoAlloc, iter_n) {
+  std::stringstream ss;
+
+  std::size_t cnt = 0;
+  const std::string expected =
+      TestCommon::readFile("test/twoalloc-iter-n.test");
+  TwoAlloc::iter_n(4, [&](const TwoAlloc& two_alloc) {
+    two_alloc.dump(ss);
+    return (++cnt <= 3);
+  });
+
+  EXPECT_EQ(ss.str(), expected);
 }

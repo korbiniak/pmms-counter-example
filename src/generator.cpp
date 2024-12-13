@@ -113,3 +113,53 @@ double Generator::uniform(double min, double max) {
   std::uniform_real_distribution<> distr(min, max);
   return distr(gen);
 }
+
+TwoVal Generator::twoValuation(const std::size_t& agents,
+                               const valuation_t& min, const valuation_t& max,
+                               bool monotone) {
+#ifdef VALUATION_T_INT64
+  std::uniform_int_distribution<> distr(min, max);
+#else
+  std::uniform_real_distribution<> distr(min, max);
+#endif
+
+  std::size_t m = agents * 2;
+  std::vector<std::vector<valuation_t>> v(m, std::vector<valuation_t>(m));
+
+  if (monotone) {
+    for (uint i = 0; i < m; i++) {
+      for (uint j = i + 1; j < m; j++) {
+        v[i][j] = distr(gen);
+        v[j][i] = v[i][j];
+      }
+    }
+
+  }
+  /* Additive case */
+  else {
+    std::vector<valuation_t> vals(m);
+    for (uint i = 0; i < m; i++) {
+      vals[i] = distr(gen);
+    }
+
+    for (uint i = 0; i < m; i++) {
+      for (uint j = i + 1; j < m; j++) {
+        v[i][j] = vals[i] + vals[j];
+        v[j][i] = v[i][j];
+      }
+    }
+  }
+
+  return TwoVal(m, v);
+}
+
+std::vector<TwoVal> Generator::twoValuations(const std::size_t& agents,
+                                             const valuation_t& min,
+                                             const valuation_t& max,
+                                             bool monotone) {
+  std::vector<TwoVal> valuations;
+  for (uint i = 0; i < agents; i++) {
+    valuations.push_back(twoValuation(agents, min, max, monotone));
+  }
+  return valuations;
+}
