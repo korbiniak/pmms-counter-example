@@ -74,6 +74,7 @@ benchmark_src = files(benchmarkdir / 'benchmark_pmms.cpp')
 random_search_src = files(srcdir / 'random_search_main.cpp')
 simulated_annealing_src = files(srcdir / 'simulated_annealing_main.cpp')
 mms_feasible_search_src = files(srcdir / 'mms_feasible_search_main.cpp')
+check_valuation_src = files(srcdir / 'check_valuation_main.cpp')
 
 test_executable = executable(
   'test_main',
@@ -95,6 +96,7 @@ executable(
 )
 
 test('all_tests', test_executable, workdir: meson.source_root())
+
 executable('random_search', [lib_src, random_search_src], include_directories: inc_dir)
 executable(
   'random_search_int',
@@ -102,6 +104,8 @@ executable(
   include_directories: inc_dir,
   cpp_args: '-DVALUATION_T_INT64',
 )
+
+executable('check_valuation', [lib_src, check_valuation_src], include_directories: inc_dir)
 
 executable(
   'simulated_annealing',

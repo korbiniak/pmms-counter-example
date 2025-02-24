@@ -33,6 +33,11 @@ class Generator {
                               const valuation_t& max_delta,
                               valuation_t normalize = 0);
 
+  Valuation zeroOneValuation(const std::size_t& items, double p);
+
+  std::vector<Valuation> zeroOneValuations(const std::size_t& agents,
+                                           const std::size_t& items, double p);
+
   std::vector<Valuation> monotoneValuations(const std::size_t& agents,
                                             const std::size_t& items,
                                             const valuation_t& min_delta,

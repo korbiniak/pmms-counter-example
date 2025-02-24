@@ -43,6 +43,8 @@ struct Args {
   EnvyModel envy_model;
   int mmsFeasibleCnt;
   bool two_val;
+  bool zero_one;
+  double zero_one_p;
 };
 
 std::size_t get_max_number_width(valuation_t max_val) {
@@ -69,6 +71,8 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
   bool monotone = args.monotone;
   EnvyModel envy_model = args.envy_model;
   bool two_val = args.two_val;
+  bool zero_one = args.zero_one;
+  double zero_one_p = args.zero_one_p;
 
   const std::size_t number_width = get_max_number_width(max_val);
 
@@ -97,12 +101,21 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
 
       current = (int)two_allocs.size();
     } else {
-      if (monotone) {
-        valuations = generator.monotoneValuations(n, m, min_val, max_val, 0,
-                                                  args.mmsFeasibleCnt);
+      if (zero_one) {
+        valuations =
+            generator.zeroOneValuations(n - args.mmsFeasibleCnt, m, zero_one_p);
+      } else if (monotone) {
+        valuations = generator.monotoneValuations(n - args.mmsFeasibleCnt, m,
+                                                  min_val, max_val, 0);
       } else {
         valuations = generator.additiveValuations(n, m, min_val, max_val);
       }
+
+      std::vector<Valuation> additiveValuations = generator.additiveValuations(
+          args.mmsFeasibleCnt, m, min_val, max_val);
+
+      valuations.insert(valuations.end(), additiveValuations.begin(),
+                        additiveValuations.end());
 
       switch (envy_model) {
         case PMMS: {
@@ -131,7 +144,7 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
           if (two_val) {
             two_vals[i].monotoneDump(std::cout, number_width);
           } else {
-            if (monotone) {
+            if (zero_one || monotone) {
               valuations[i].monotoneDump(std::cout);
             } else {
               valuations[i].additiveDump(std::cout, number_width);
@@ -143,11 +156,11 @@ void randomValuationAllocationsCount(Args args, std::atomic<int>& min_count,
         std::cout << "Number of allocations: " << current << std::endl;
 
         // if (current <= 3) {
-        //   std::cout << "All allocations:" << std::endl;
-        //   for (const Allocation& allocation : allocations) {
-        //     allocation.dump(std::cout);
-        //     std::cout << std::endl;
-        //   }
+        std::cout << "All allocations:" << std::endl;
+        for (const Allocation& allocation : allocations) {
+          allocation.dump(std::cout);
+          std::cout << std::endl;
+        }
         // }
 
         if (current == 0) {
@@ -177,7 +190,10 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
       cxxopts::value<int>()->default_value("2147483647"))(
       "mms-feasible-cnt", "Number of MMS feasible agents to generate",
       cxxopts::value<int>()->default_value("0"))(
-      "two_val", "Use two-valuations instead of regular valuations");
+      "two_val", "Use two-valuations instead of regular valuations")(
+      "zero_one", "Use zero-one valuations instead of regular valuations")(
+      "zero_one_p", "Probablity for zero-one valuations",
+      cxxopts::value<double>()->default_value("0.5"));
 
   auto result = options.parse(argc, argv);
 
@@ -195,6 +211,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
   bool monotone = result.count("monotone");
   int max_alloc = result["max_alloc"].as<int>();
   bool two_val = result.count("two_val");
+  double zero_one_p = result["zero_one_p"].as<double>();
+  bool zero_one = result.count("zero_one");
 
   int mms_feasible_cnt = result["mms-feasible-cnt"].as<int>();
 
@@ -228,6 +246,8 @@ void parseCommandLineAndRun(int argc, char* argv[]) {
         .envy_model = envy_model,
         .mmsFeasibleCnt = mms_feasible_cnt,
         .two_val = two_val,
+        .zero_one = zero_one,
+        .zero_one_p = zero_one_p,
     };
     threads.emplace_back(randomValuationAllocationsCount, args,
                          std::ref(min_allocs), std::ref(cout_mutex));

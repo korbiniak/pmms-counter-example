@@ -28,6 +28,7 @@ Valuation Generator::additiveValuation(const std::size_t& items,
   std::vector<valuation_t> v(items);
   for (uint j = 0; j < items; ++j) {
     v[j] = distr(gen);
+    // v[j] = j + 100;
   }
   return Valuation(v).normalize(normalize);
 }
@@ -71,6 +72,40 @@ Valuation Generator::monotoneValuation(const std::size_t& items,
   }
 
   return Valuation(items, std::move(v)).normalize(normalize);
+}
+
+Valuation Generator::zeroOneValuation(const std::size_t& items, double p) {
+  std::uniform_int_distribution<> distr(2, p);
+
+  std::unique_ptr<valuation_t[]> v =
+      std::unique_ptr<valuation_t[]>(new valuation_t[1 << items]);
+
+  v[0] = 0;
+
+  for (int mask = 1; mask < (1 << items); mask++) {
+    if (__builtin_popcount(mask) == 1) {
+      v[mask] = 1;
+      continue;
+    }
+    if (__builtin_popcount(mask) >= 3) {
+      v[mask] = p + 1;
+      continue;
+    }
+    v[mask] = distr(gen);
+  }
+
+  return Valuation(items, std::move(v));
+}
+
+std::vector<Valuation> Generator::zeroOneValuations(const std::size_t& agents,
+                                                    const std::size_t& items,
+                                                    double p) {
+
+  std::vector<Valuation> valuations;
+  for (uint i = 0; i < agents; i++) {
+    valuations.push_back(zeroOneValuation(items, p));
+  }
+  return valuations;
 }
 
 std::vector<Valuation> Generator::monotoneValuations(
